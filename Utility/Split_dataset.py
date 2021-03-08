@@ -34,7 +34,7 @@ def train_test_split(df, test_percentage=0.2):
 
 
 def split_dataset(max_file_count, test_percentage):
-    dataset = pd.read_csv("Data/Java_Unified_Data.csv")
+    dataset = pd.read_csv("Data/Java_Unified_Data_with_SHA.csv")
     dataset['opendate'] = pd.to_datetime(dataset['opendate'], format="%Y-%m-%d")
     dataset['fixdate'] = pd.to_datetime(dataset['fixdate'], format="%Y-%m-%d")
     column_names = ['id', 'version', 'title', 'description', 'opendate', 'fixdate']
