@@ -162,19 +162,19 @@ class BugDataset(Dataset):
 if __name__ == "__main__":
     build_lib()
     scratch_path = "/scratch/"
-    root_path = "/project/def-m2nagapp/partha9/Aster/Reformer/"
+    root_path = "/project/def-m2nagapp/partha9/Aster/ReformerTest/"
     Path(root_path).mkdir(parents=True, exist_ok=True)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     create_java_only_dataset()
     create_report_files()
     create_ast_files()
-    train_data, val_data = train_test_split(pd.read_csv("Data/Java_Train_Data.csv"), test_size=0.125)
+    train_data, val_data = train_test_split(pd.read_csv(scratch_path + "partha9/Data/Java_Train_Data.csv"), test_size=0.125)
     before_fix_ast_paths = train_data['before_fix_uuid_file_path'].map(
-        lambda x: "Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
+        lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
     after_fix_ast_paths = train_data['after_fix_uuid_file_path'].map(
-        lambda x: "Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
+        lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
     report_files = train_data['before_fix_uuid_file_path'].map(
-        lambda x: "Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
+        lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
     all_file_path = before_fix_ast_paths + report_files
     if not os.path.isfile(root_path + "/tokenizer/aster-vocab.json"):
         tokenizer = ByteLevelBPETokenizer()
@@ -188,7 +188,7 @@ if __name__ == "__main__":
         Path(root_path + "/tokenizer/").mkdir(parents=True, exist_ok=True)
         tokenizer.save_model(root_path + "/tokenizer/", "./aster")
     tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
-    temp_dataset = BugDataset("Data/Java_Train_Data.csv")
+    temp_dataset = BugDataset(scratch_path + "partha9/Data/Java_Train_Data.csv")
     temp_dataloader = DataLoader(temp_dataset, batch_size=4, num_workers=1)
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer, mlm=True, mlm_probability=0.15
