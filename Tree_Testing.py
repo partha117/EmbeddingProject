@@ -1,8 +1,10 @@
 from tree_sitter import Language, Parser
 from collections import deque
 from queue import LifoQueue
+from transformers import Trainer
+from transformers import Trainer, TrainingArguments
 
-
+Trainer().train()
 class TreeNode:
     def __init__(self,node_info, parent=None):
         self.node_information = node_info
