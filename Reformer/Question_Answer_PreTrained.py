@@ -12,11 +12,13 @@ from transformers import DataCollatorForLanguageModeling, RobertaConfig, Reforme
     XLMRobertaConfig
 from transformers import Trainer, TrainingArguments
 from transformers import AdamW, RobertaModel, AutoModel, RobertaTokenizer, AutoModelForMaskedLM, RobertaForMaskedLM, \
-    XLNetLMHeadModel, ReformerForMaskedLM
+    XLNetLMHeadModel, ReformerForMaskedLM, ReformerForQuestionAnswering
 from joblib import Parallel, delayed
 import json
 from tree_sitter import Language, Parser
 import re
+import numpy as np
+from tqdm import tqdm
 
 
 def build_lib():
@@ -106,25 +108,41 @@ def create_ast_files():
         )
 
 
-def file_reader(ast_paths, report_paths):
-    if not isinstance(ast_paths, str):
-        accumulate = []
-        for ast, report in zip(ast_paths, report_paths):
-            temp = ""
+def file_reader(before_fix_ast_paths, after_fix_ast_path, report_paths):
+    if not isinstance(before_fix_ast_paths, str):
+        accumulate = [[], [], []]
+        for before_ast, after_ast, report in zip(before_fix_ast_paths, after_fix_ast_path, report_paths):
             with open(report, "r") as file:
-                temp += file.read()
-            with open(ast, "r") as file:
-                temp += file.read()
-            accumulate.append(temp)
+                accumulate[0].append(file.read())
+            with open(before_ast, "r") as file:
+                accumulate[1].append(file.read())
+            with open(after_ast, "r") as file:
+                accumulate[2].append(file.read())
     else:
-        acuumulate = None
-        temp = ""
+        accumulate = []
         with open(report_paths, "r") as file:
-            temp += file.read()
-        with open(ast_paths, "r") as file:
-            temp += file.read()
-        accumulate = temp
+            accumulate.append(file.read())
+        with open(before_fix_ast_paths, "r") as file:
+            accumulate.append(file.read())
+        with open(after_fix_ast_path, "r") as file:
+            accumulate.append(file.read())
     return accumulate
+
+
+def find_difference(before, after):
+    before, after = np.array(before), np.array(after)
+    maxlength = max(len(before), len(after))
+    padded_before = before if len(before) == maxlength else np.pad(before, (0, maxlength - len(before)),
+                                                                   constant_values=-1)
+    padded_after = after if len(after) == maxlength else np.pad(after, (0, maxlength - len(after)), constant_values=-1)
+    difference = np.where(padded_before != padded_after)
+    # print("-----------------------------------------------------\n")
+    # print(difference)
+    if len(difference[0]) == 0:
+        return torch.tensor([0]), torch.tensor([0])
+    start = difference[0][0]
+    end = len(before) - 1 if len(before) < maxlength else difference[0][-1]
+    return torch.tensor([start]), torch.tensor([end])
 
 
 class BugDataset(Dataset):
@@ -146,17 +164,26 @@ class BugDataset(Dataset):
         if isinstance(idx, int):
             before_fix_ast_path = scratch_path + "partha9/Data/AST_Files/" + get_uuid(
                 rows['before_fix_uuid_file_path']) + ".txt"
+            after_fix_ast_path = scratch_path + "partha9/Data/AST_Files/" + get_uuid(
+                rows['after_fix_uuid_file_path']) + ".txt"
             report_files = scratch_path + "partha9/Data/Report_Files/" + get_uuid(
                 rows['before_fix_uuid_file_path']) + ".txt"
         else:
             before_fix_ast_path = rows['before_fix_uuid_file_path'].map(
                 lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
+            after_fix_ast_path = rows['after_fix_uuid_file_path'].map(
+                lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
             report_files = rows['before_fix_uuid_file_path'].map(
                 lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
-        temp = file_reader(before_fix_ast_path, report_files)
-        return \
-        self.tokenizer.encode_plus(temp, truncation=True, max_length=2048, padding=True, pad_to_multiple_of=2048)[
-            'input_ids']
+        temp = file_reader(before_fix_ast_path, after_fix_ast_path, report_files)
+        before, after = self.tokenizer.encode_plus(temp[1], truncation=True, max_length=2048)['input_ids'], \
+                        self.tokenizer.encode_plus(temp[2], truncation=True, max_length=2048)['input_ids']
+        start, end = find_difference(before, after)
+        report_context = self.tokenizer.encode_plus(temp[0], temp[1], truncation=True, max_length=2048, padding=True,
+                                                    pad_to_multiple_of=2048)
+        return {'input_ids': torch.tensor(report_context['input_ids']),
+                'attention_mask': torch.tensor(report_context['attention_mask']), 'start_positions': start,
+                'end_positions': end}
 
 
 if __name__ == "__main__":
@@ -168,7 +195,8 @@ if __name__ == "__main__":
     create_java_only_dataset()
     create_report_files()
     create_ast_files()
-    train_data, val_data = train_test_split(pd.read_csv(scratch_path + "partha9/Data/Java_Train_Data.csv"), test_size=0.125)
+    train_data, val_data = train_test_split(pd.read_csv(scratch_path + "partha9/Data/Java_Train_Data.csv"),
+                                            test_size=0.125)
     before_fix_ast_paths = train_data['before_fix_uuid_file_path'].map(
         lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
     after_fix_ast_paths = train_data['after_fix_uuid_file_path'].map(
@@ -188,30 +216,34 @@ if __name__ == "__main__":
         Path(root_path + "/tokenizer/").mkdir(parents=True, exist_ok=True)
         tokenizer.save_model(root_path + "/tokenizer/", "./aster")
     tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
-    temp_dataset = BugDataset(scratch_path + "partha9/Data/Java_Train_Data.csv")
-    temp_dataloader = DataLoader(temp_dataset, batch_size=4, num_workers=1)
-    data_collator = DataCollatorForLanguageModeling(
-        tokenizer=tokenizer, mlm=True, mlm_probability=0.15
-    )
-    Path(root_path + "/train_output/").mkdir(parents=True, exist_ok=True)
-    training_args = TrainingArguments(
-        output_dir=root_path + "/train_output/",
-        overwrite_output_dir=True,
-        num_train_epochs=1,
-        per_device_train_batch_size=2,
-        save_steps=500,
-        save_total_limit=4,
-        dataloader_drop_last=True
-    )
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    save_at = 500
+    # ToD0: Load a MLM pre-trained model in that case config is not required
     config = ReformerConfig.from_pretrained("/project/6033386/partha9/model_cache/reformer_config", axial_pos_shape=(32, 64),
-                                            vocab_size=tokenizer.vocab_size, max_position_embeddings=4096) # ReformerConfig.from_pretrained("google/reformer-enwik8")
+                                            vocab_size=tokenizer.vocab_size, max_position_embeddings=4096)
     config.is_decoder = False
-    model = ReformerForMaskedLM(
-        config=config)  # ReformerForMaskedLM.from_pretrained("google/reformer-enwik8",config=config)
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        data_collator=data_collator,
-        train_dataset=BugDataset(dataframe=train_data, tokenizer=tokenizer)
-    )
-    trainer.train()
+    model = ReformerForMaskedLM(config=config)
+    train_dataset = BugDataset(dataframe=train_data, tokenizer=tokenizer)
+    model.to(device)
+    model.train()
+    optim = AdamW(model.parameters(), lr=5e-5)
+    train_loader = DataLoader(train_dataset, batch_size=6, shuffle=True)
+    for epoch in range(3):
+        model.train()
+        loop = tqdm(train_loader, leave=True)
+        for i, batch in enumerate(loop):
+            optim.zero_grad()
+            input_ids = batch['input_ids'].to(device)
+            attention_mask = batch['attention_mask'].to(device)
+            start_positions = batch['start_positions'].to(device)
+            end_positions = batch['end_positions'].to(device)
+            outputs = model(input_ids, attention_mask=attention_mask,
+                            start_positions=start_positions,
+                            end_positions=end_positions)
+            loss = outputs[0]
+            loss.backward()
+            optim.step()
+            loop.set_description(f'Epoch {epoch}')
+            loop.set_postfix(loss=loss.item())
+            if i % save_at == 0:
+                model.save_pretrained(root_path + "/train_output/" + "CheckPoint_{}".format(i), save_config=True)
