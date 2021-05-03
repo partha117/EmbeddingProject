@@ -1,32 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
-# ! git clone https://github.com/tree-sitter/tree-sitter-java
-# ! cp /project/def-m2nagapp/partha9/Dataset/my-languages.so /scratch-deleted-2021-mar-20/partha9/
-
-
-# In[2]:
-
-
-# from tree_sitter import Language, Parser
-
-# Language.build_library(
-#   # Store the library in the `build` directory
-#   '/home/partha9/build/my-languages.so',
-
-#   # Include one or more languages
-#   [
-#     'tree-sitter-java',
-#   ]
-# )
-
-
-# In[3]:
-
-
+from tree_sitter import Language, Parser
 from pathlib import Path
 from tokenizers import ByteLevelBPETokenizer
 import pandas as pd
@@ -48,26 +20,17 @@ from torch.utils.data import DataLoader
 from transformers import AdamW
 from tqdm import tqdm
 
-# In[4]:
 
-scratch_path = "/scratch/"
-root_path = "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension_QA/"
-Path(root_path).mkdir(parents=True, exist_ok=True)
+def build_lib():
+    Language.build_library(
+        # Store the library in the `build` directory
+        '/home/partha9/build/my-languages.so',
 
-# In[5]:
-
-
-# !mkdir /scratch-deleted-2021-mar-20/partha9/Data/
-# !unzip /project/def-m2nagapp/partha9/Data/graham_upload.zip  -d /scratch-deleted-2021-mar-20/partha9/Data/
-
-
-# In[6]:
-
-
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-
-
-# In[7]:
+        # Include one or more languages
+        [
+            'tree-sitter-java',
+        ]
+    )
 
 
 def create_java_only_dataset():
@@ -78,20 +41,8 @@ def create_java_only_dataset():
         df2.to_csv("Data/Java_Unified_Data_with_SHA.csv", index=False)
 
 
-# In[8]:
-
-
-create_java_only_dataset()
-
-
-# In[9]:
-
-
 def get_uuid(text):
     return text.split("/")[-1].split(".")[0]
-
-
-# In[10]:
 
 
 def remove_comments_and_docstrings(source):
@@ -113,9 +64,6 @@ def remove_comments_and_docstrings(source):
     return '\n'.join(temp)
 
 
-# In[11]:
-
-
 def create_report_files():
     if not os.path.isdir(scratch_path + "partha9/Data/Report_Files/"):
         Path(scratch_path + "partha9/Data/Report_Files/").mkdir(parents=True, exist_ok=True)
@@ -127,23 +75,11 @@ def create_report_files():
             file.close()
 
 
-# In[12]:
-
-
-create_report_files()
-
-
-# In[13]:
-
-
 def convert_file_to_ast(file_path, parser):
     file = open(file_path, "r")
     file_content = file.read()
     tree = parser.parse(bytes(file_content, "utf-8"))
     return tree.root_node.sexp()
-
-
-# In[14]:
 
 
 def save_file(path, item):
@@ -172,15 +108,6 @@ def create_ast_files():
         )
 
 
-# In[15]:
-
-
-create_ast_files()
-
-
-# In[16]:
-
-
 def file_reader(before_fix_ast_paths, after_fix_ast_path, report_paths):
     if not isinstance(before_fix_ast_paths, str):
         accumulate = [[], [], []]
@@ -201,8 +128,6 @@ def file_reader(before_fix_ast_paths, after_fix_ast_path, report_paths):
             accumulate.append(file.read())
     return accumulate
 
-
-# In[32]:
 
 def find_difference(before, after):
     before, after = np.array(before), np.array(after)
@@ -261,107 +186,75 @@ class BugDataset(Dataset):
                 'end_positions': end}
 
 
-# In[18]:
+if __name__ == "__main__":
+    scratch_path = "/scratch/"
+    root_path = "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension_QA/"
+    Path(root_path).mkdir(parents=True, exist_ok=True)
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    create_java_only_dataset()
+    create_report_files()
+    create_ast_files()
+    train_data, val_data = train_test_split(pd.read_csv(scratch_path + "partha9/Data/Java_Train_Data.csv"),
+                                            test_size=0.125)
+    before_fix_ast_paths = train_data['before_fix_uuid_file_path'].map(
+        lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
+    after_fix_ast_paths = train_data['after_fix_uuid_file_path'].map(
+        lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
+    report_files = train_data['before_fix_uuid_file_path'].map(
+        lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
 
+    all_file_path = before_fix_ast_paths + report_files
 
-train_data, val_data = train_test_split(pd.read_csv(scratch_path + "partha9/Data/Java_Train_Data.csv"),
-                                        test_size=0.125)
+    if not os.path.isfile(root_path + "/tokenizer/aster-vocab.json"):
+        tokenizer = ByteLevelBPETokenizer()
+        tokenizer.train(files=all_file_path, min_frequency=2, special_tokens=[
+            "<s>",
+            "<pad>",
+            "</s>",
+            "<unk>",
+            "<mask>",
+        ])
+        Path(root_path + "/tokenizer/").mkdir(parents=True, exist_ok=True)
+        tokenizer.save_model(root_path + "/tokenizer/", "./aster")
+    tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
 
-# In[19]:
-
-
-before_fix_ast_paths = train_data['before_fix_uuid_file_path'].map(
-    lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
-after_fix_ast_paths = train_data['after_fix_uuid_file_path'].map(
-    lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
-report_files = train_data['before_fix_uuid_file_path'].map(
-    lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
-
-# In[20]:
-
-
-all_file_path = before_fix_ast_paths + report_files
-
-# In[21]:
-
-
-if not os.path.isfile(root_path + "/tokenizer/aster-vocab.json"):
-    tokenizer = ByteLevelBPETokenizer()
-    tokenizer.train(files=all_file_path, min_frequency=2, special_tokens=[
-        "<s>",
-        "<pad>",
-        "</s>",
-        "<unk>",
-        "<mask>",
-    ])
-    Path(root_path + "/tokenizer/").mkdir(parents=True, exist_ok=True)
-    tokenizer.save_model(root_path + "/tokenizer/", "./aster")
-
-# In[22]:
-
-
-# tokenizer = ByteLevelBPETokenizer(
-#     "aster-vocab.json",
-#     "aster-merges.txt",
-# )
-# tokenizer._tokenizer.post_processor = RobertaProcessing(
-#     ("</s>", tokenizer.token_to_id("</s>")),
-#     ("<s>", tokenizer.token_to_id("<s>")),
-# )
-# tokenizer.enable_truncation(max_length=3000)
-
-
-# In[23]:
-
-
-tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
-
-# In[24]:
-
-
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-# save point
-save_at = 500
-# load model
-model = RobertaForQuestionAnswering.from_pretrained("/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension" + "/train_output/" + "checkpoint-18000/")
-train_dataset = BugDataset(dataframe=train_data, tokenizer=tokenizer)
-# move model over to detected device
-model.to(device)
-# activate training mode of model
-model.train()
-# initialize adam optimizer with weight decay (reduces chance of overfitting)
-optim = AdamW(model.parameters(), lr=5e-5)
-
-# initialize data loader for training data
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-
-for epoch in range(3):
-    # set model to train mode
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    save_at = 500
+    model = RobertaForQuestionAnswering.from_pretrained(
+        "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension" + "/train_output/" + "checkpoint-18000/")
+    train_dataset = BugDataset(dataframe=train_data, tokenizer=tokenizer)
+    model.to(device)
     model.train()
-    # setup loop (we use tqdm for the progress bar)
-    loop = tqdm(train_loader, leave=True)
-    for i, batch in enumerate(loop):
-        # initialize calculated gradients (from prev step)
-        optim.zero_grad()
-        # pull all the tensor batches required for training
-        input_ids = batch['input_ids'].to(device)
-        attention_mask = batch['attention_mask'].to(device)
-        start_positions = batch['start_positions'].to(device)
-        end_positions = batch['end_positions'].to(device)
-        # train model on batch and return outputs (incl. loss)
-        outputs = model(input_ids, attention_mask=attention_mask,
-                        start_positions=start_positions,
-                        end_positions=end_positions)
-        # extract loss
-        loss = outputs[0]
-        # calculate loss for every parameter that needs grad update
-        loss.backward()
-        # update parameters
-        optim.step()
-        # print relevant info to progress bar
-        loop.set_description("Epoch {}".format(epoch))
-        loop.set_postfix(loss=loss.item())
-        if i % save_at == 0:
-            model.save_pretrained(
-                scratch_path + "partha9/Aster/PlainRobertaWithAst_Size_Extension_QA/" + "/train_output/" + "CheckPoint-{}".format(
-                    i))
+    optim = AdamW(model.parameters(), lr=5e-5)
+    train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
+
+    for epoch in range(3):
+        # set model to train mode
+        model.train()
+        # setup loop (we use tqdm for the progress bar)
+        loop = tqdm(train_loader, leave=True)
+        for i, batch in enumerate(loop):
+            # initialize calculated gradients (from prev step)
+            optim.zero_grad()
+            # pull all the tensor batches required for training
+            input_ids = batch['input_ids'].to(device)
+            attention_mask = batch['attention_mask'].to(device)
+            start_positions = batch['start_positions'].to(device)
+            end_positions = batch['end_positions'].to(device)
+            # train model on batch and return outputs (incl. loss)
+            outputs = model(input_ids, attention_mask=attention_mask,
+                            start_positions=start_positions,
+                            end_positions=end_positions)
+            # extract loss
+            loss = outputs[0]
+            # calculate loss for every parameter that needs grad update
+            loss.backward()
+            # update parameters
+            optim.step()
+            # print relevant info to progress bar
+            loop.set_description("Epoch {}".format(epoch))
+            loop.set_postfix(loss=loss.item())
+            if i % save_at == 0:
+                model.save_pretrained(
+                    scratch_path + "partha9/Aster/PlainRobertaWithAst_Size_Extension_QA/" + "/train_output/" + "CheckPoint-{}".format(
+                        i))
