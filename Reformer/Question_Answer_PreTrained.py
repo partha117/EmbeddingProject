@@ -219,10 +219,10 @@ if __name__ == "__main__":
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     save_at = 500
     # ToDo: Load a MLM pre-trained model in that case config is not required
-    config = ReformerForQuestionAnswering.from_pretrained("/project/6033386/partha9/model_cache/reformer_config", axial_pos_shape=(32, 64),
+    config = ReformerConfig.from_pretrained("/project/6033386/partha9/model_cache/reformer_config", axial_pos_shape=(32, 64),
                                             vocab_size=tokenizer.vocab_size, max_position_embeddings=4096)
     config.is_decoder = False
-    model = ReformerForMaskedLM(config=config)
+    model = ReformerForQuestionAnswering(config=config)
     train_dataset = BugDataset(dataframe=train_data, tokenizer=tokenizer)
     model.to(device)
     model.train()
