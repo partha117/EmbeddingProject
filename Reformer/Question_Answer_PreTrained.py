@@ -189,7 +189,7 @@ class BugDataset(Dataset):
 if __name__ == "__main__":
     build_lib()
     scratch_path = "/scratch/"
-    root_path = "/project/def-m2nagapp/partha9/Aster/ReformerTest/"
+    root_path = "/project/def-m2nagapp/partha9/Aster/ReformerQA/"
     Path(root_path).mkdir(parents=True, exist_ok=True)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     create_java_only_dataset()
