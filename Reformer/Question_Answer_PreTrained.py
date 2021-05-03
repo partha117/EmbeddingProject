@@ -218,8 +218,8 @@ if __name__ == "__main__":
     tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     save_at = 500
-    # ToD0: Load a MLM pre-trained model in that case config is not required
-    config = ReformerConfig.from_pretrained("/project/6033386/partha9/model_cache/reformer_config", axial_pos_shape=(32, 64),
+    # ToDo: Load a MLM pre-trained model in that case config is not required
+    config = ReformerForQuestionAnswering.from_pretrained("/project/6033386/partha9/model_cache/reformer_config", axial_pos_shape=(32, 64),
                                             vocab_size=tokenizer.vocab_size, max_position_embeddings=4096)
     config.is_decoder = False
     model = ReformerForMaskedLM(config=config)
