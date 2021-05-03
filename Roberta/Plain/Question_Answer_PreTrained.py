@@ -176,8 +176,8 @@ class BugDataset(Dataset):
             report_files = rows['before_fix_uuid_file_path'].map(
                 lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
         temp = file_reader(before_fix_ast_path, after_fix_ast_path, report_files)
-        before, after = self.tokenizer.encode_plus(temp[1], truncation=True, max_length=1498)['input_ids'], \
-                        self.tokenizer.encode_plus(temp[2], truncation=True, max_length=1498)['input_ids']
+        before, after = self.tokenizer.encode_plus(temp[1], truncation=True, max_length=512)['input_ids'], \
+                        self.tokenizer.encode_plus(temp[2], truncation=True, max_length=512)['input_ids']
         start, end = find_difference(before, after)
         report_context = self.tokenizer.encode_plus(temp[0], temp[1], truncation=True, max_length=512, padding=True,
                                                     pad_to_multiple_of=512)
@@ -188,7 +188,7 @@ class BugDataset(Dataset):
 
 if __name__ == "__main__":
     scratch_path = "/scratch/"
-    root_path = "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension_QA/"
+    root_path = "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_QA/"
     Path(root_path).mkdir(parents=True, exist_ok=True)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     create_java_only_dataset()
@@ -221,7 +221,7 @@ if __name__ == "__main__":
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     save_at = 500
     model = RobertaForQuestionAnswering.from_pretrained(
-        "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension" + "/train_output/" + "checkpoint-18000/")
+        "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst" + "/train_output/" + "checkpoint-18000/")
     train_dataset = BugDataset(dataframe=train_data, tokenizer=tokenizer)
     model.to(device)
     model.train()

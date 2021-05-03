@@ -1,4 +1,3 @@
-from tree_sitter import Language, Parser
 from pathlib import Path
 from tokenizers import ByteLevelBPETokenizer
 import pandas as pd
@@ -12,13 +11,10 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import DataCollatorForLanguageModeling, RobertaConfig, ReformerConfig, XLNetConfig, XLMConfig, \
     XLMRobertaConfig
 from transformers import Trainer, TrainingArguments
-from transformers import AdamW, RobertaModel, AutoModel, RobertaTokenizer, AutoModelForMaskedLM, RobertaForMaskedLM, \
-    RobertaForQuestionAnswering
+from transformers import AdamW, RobertaModel, AutoModel, RobertaTokenizer, AutoModelForMaskedLM, RobertaForMaskedLM
 from joblib import Parallel, delayed
-import numpy as np
-from torch.utils.data import DataLoader
-from transformers import AdamW
-from tqdm import tqdm
+from tree_sitter import Language, Parser
+import re
 
 
 def build_lib():
@@ -108,41 +104,25 @@ def create_ast_files():
         )
 
 
-def file_reader(before_fix_ast_paths, after_fix_ast_path, report_paths):
-    if not isinstance(before_fix_ast_paths, str):
-        accumulate = [[], [], []]
-        for before_ast, after_ast, report in zip(before_fix_ast_paths, after_fix_ast_path, report_paths):
-            with open(report, "r") as file:
-                accumulate[0].append(file.read())
-            with open(before_ast, "r") as file:
-                accumulate[1].append(file.read())
-            with open(after_ast, "r") as file:
-                accumulate[2].append(file.read())
-    else:
+def file_reader(ast_paths, report_paths):
+    if not isinstance(ast_paths, str):
         accumulate = []
+        for ast, report in zip(ast_paths, report_paths):
+            temp = ""
+            with open(report, "r") as file:
+                temp += file.read()
+            with open(ast, "r") as file:
+                temp += file.read()
+            accumulate.append(temp)
+    else:
+        acuumulate = None
+        temp = ""
         with open(report_paths, "r") as file:
-            accumulate.append(file.read())
-        with open(before_fix_ast_paths, "r") as file:
-            accumulate.append(file.read())
-        with open(after_fix_ast_path, "r") as file:
-            accumulate.append(file.read())
+            temp += file.read()
+        with open(ast_paths, "r") as file:
+            temp += file.read()
+        accumulate = temp
     return accumulate
-
-
-def find_difference(before, after):
-    before, after = np.array(before), np.array(after)
-    maxlength = max(len(before), len(after))
-    padded_before = before if len(before) == maxlength else np.pad(before, (0, maxlength - len(before)),
-                                                                   constant_values=-1)
-    padded_after = after if len(after) == maxlength else np.pad(after, (0, maxlength - len(after)), constant_values=-1)
-    difference = np.where(padded_before != padded_after)
-    # print("-----------------------------------------------------\n")
-    # print(difference)
-    if len(difference[0]) == 0:
-        return torch.tensor([0]), torch.tensor([0])
-    start = difference[0][0]
-    end = len(before) - 1 if len(before) < maxlength else difference[0][-1]
-    return torch.tensor([start]), torch.tensor([end])
 
 
 class BugDataset(Dataset):
@@ -164,47 +144,34 @@ class BugDataset(Dataset):
         if isinstance(idx, int):
             before_fix_ast_path = scratch_path + "partha9/Data/AST_Files/" + get_uuid(
                 rows['before_fix_uuid_file_path']) + ".txt"
-            after_fix_ast_path = scratch_path + "partha9/Data/AST_Files/" + get_uuid(
-                rows['after_fix_uuid_file_path']) + ".txt"
             report_files = scratch_path + "partha9/Data/Report_Files/" + get_uuid(
                 rows['before_fix_uuid_file_path']) + ".txt"
         else:
             before_fix_ast_path = rows['before_fix_uuid_file_path'].map(
                 lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
-            after_fix_ast_path = rows['after_fix_uuid_file_path'].map(
-                lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
             report_files = rows['before_fix_uuid_file_path'].map(
                 lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
-        temp = file_reader(before_fix_ast_path, after_fix_ast_path, report_files)
-        before, after = self.tokenizer.encode_plus(temp[1], truncation=True, max_length=1498)['input_ids'], \
-                        self.tokenizer.encode_plus(temp[2], truncation=True, max_length=1498)['input_ids']
-        start, end = find_difference(before, after)
-        report_context = self.tokenizer.encode_plus(temp[0], temp[1], truncation=True, max_length=512, padding=True,
-                                                    pad_to_multiple_of=512)
-        return {'input_ids': torch.tensor(report_context['input_ids']),
-                'attention_mask': torch.tensor(report_context['attention_mask']), 'start_positions': start,
-                'end_positions': end}
+        temp = file_reader(before_fix_ast_path, report_files)
+        return self.tokenizer.encode_plus(temp, truncation=True, max_length=512)['input_ids']
 
 
 if __name__ == "__main__":
     scratch_path = "/scratch/"
-    root_path = "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension_QA/"
+    root_path = "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension/"
     Path(root_path).mkdir(parents=True, exist_ok=True)
+    train_data, val_data = train_test_split(pd.read_csv(scratch_path + "partha9/Data/Java_Train_Data.csv"),
+                                            test_size=0.125)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     create_java_only_dataset()
     create_report_files()
     create_ast_files()
-    train_data, val_data = train_test_split(pd.read_csv(scratch_path + "partha9/Data/Java_Train_Data.csv"),
-                                            test_size=0.125)
     before_fix_ast_paths = train_data['before_fix_uuid_file_path'].map(
         lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
     after_fix_ast_paths = train_data['after_fix_uuid_file_path'].map(
         lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
     report_files = train_data['before_fix_uuid_file_path'].map(
         lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
-
     all_file_path = before_fix_ast_paths + report_files
-
     if not os.path.isfile(root_path + "/tokenizer/aster-vocab.json"):
         tokenizer = ByteLevelBPETokenizer()
         tokenizer.train(files=all_file_path, min_frequency=2, special_tokens=[
@@ -217,44 +184,28 @@ if __name__ == "__main__":
         Path(root_path + "/tokenizer/").mkdir(parents=True, exist_ok=True)
         tokenizer.save_model(root_path + "/tokenizer/", "./aster")
     tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
+    temp_dataset = BugDataset(scratch_path + "partha9/Data/Java_Train_Data.csv")
+    temp_dataloader = DataLoader(temp_dataset, batch_size=4, num_workers=1)
+    data_collator = DataCollatorForLanguageModeling(
+        tokenizer=tokenizer, mlm=True, mlm_probability=0.15
+    )
+    Path(root_path + "/train_output/").mkdir(parents=True, exist_ok=True)
+    training_args = TrainingArguments(
+        output_dir=root_path + "/train_output/",
+        overwrite_output_dir=True,
+        num_train_epochs=4,
+        per_device_train_batch_size=2,
+        save_steps=500,
+        save_total_limit=4,
+        dataloader_drop_last=True
 
-    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    save_at = 500
-    model = RobertaForQuestionAnswering.from_pretrained(
-        "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension" + "/train_output/" + "checkpoint-18000/")
-    train_dataset = BugDataset(dataframe=train_data, tokenizer=tokenizer)
-    model.to(device)
-    model.train()
-    optim = AdamW(model.parameters(), lr=5e-5)
-    train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-
-    for epoch in range(3):
-        # set model to train mode
-        model.train()
-        # setup loop (we use tqdm for the progress bar)
-        loop = tqdm(train_loader, leave=True)
-        for i, batch in enumerate(loop):
-            # initialize calculated gradients (from prev step)
-            optim.zero_grad()
-            # pull all the tensor batches required for training
-            input_ids = batch['input_ids'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
-            start_positions = batch['start_positions'].to(device)
-            end_positions = batch['end_positions'].to(device)
-            # train model on batch and return outputs (incl. loss)
-            outputs = model(input_ids, attention_mask=attention_mask,
-                            start_positions=start_positions,
-                            end_positions=end_positions)
-            # extract loss
-            loss = outputs[0]
-            # calculate loss for every parameter that needs grad update
-            loss.backward()
-            # update parameters
-            optim.step()
-            # print relevant info to progress bar
-            loop.set_description("Epoch {}".format(epoch))
-            loop.set_postfix(loss=loss.item())
-            if i % save_at == 0:
-                model.save_pretrained(
-                    root_path + "/train_output/" + "CheckPoint-{}".format(
-                        i))
+    )
+    model = RobertaForMaskedLM.from_pretrained('roberta-base')
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        data_collator=data_collator,
+        train_dataset=BugDataset(dataframe=train_data, tokenizer=tokenizer),
+        #     eval_dataset= BugDataset(dataframe=val_data,tokenizer=tokenizer)
+    )
+    trainer.train()
