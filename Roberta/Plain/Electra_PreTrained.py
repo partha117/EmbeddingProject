@@ -151,8 +151,7 @@ class BugDataset(Dataset):
                 lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
         temp = file_reader(before_fix_ast_path, report_files)
         return \
-            self.tokenizer.encode_plus(temp, truncation=True, max_length=2048, padding=True, pad_to_multiple_of=2048)[
-                'input_ids']
+            self.tokenizer.encode_plus(temp, truncation=True, max_length=512, padding=True, pad_to_multiple_of=512)
 
 
 
