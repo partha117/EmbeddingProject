@@ -11,7 +11,8 @@ from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, TensorDataset
 from tensorboardX import SummaryWriter
 from transformers import RobertaModel, BertPreTrainedModel, AutoConfig, \
-    get_linear_schedule_with_warmup, AdamW
+    get_linear_schedule_with_warmup, AdamW, AutoModel
+from transformers.models.electra.modeling_electra import ElectraDiscriminatorPredictions
 import numpy as np
 
 
@@ -53,6 +54,42 @@ def get_mask_subset_with_prob(mask, prob):
     new_mask = torch.zeros((batch, seq_len + 1), device=device)
     new_mask.scatter_(-1, sampled_indices, 1)
     return new_mask[:, 1:].bool()
+
+
+class ElectraForPreTraining(BertPreTrainedModel):
+    def __init__(self, config):
+        super().__init__(config)
+        self.electra = AutoModel(config)
+        self.discriminator_predictions = ElectraDiscriminatorPredictions(config)
+        self.init_weights()
+
+    def forward(
+            self,
+            input_ids=None,
+            attention_mask=None,
+            token_type_ids=None,
+            position_ids=None,
+            head_mask=None,
+            inputs_embeds=None,
+            labels=None,
+            output_attentions=None,
+            output_hidden_states=None,
+            return_dict=None,
+    ):
+        discriminator_hidden_states = self.electra(
+            input_ids,
+            attention_mask,
+            token_type_ids,
+            position_ids,
+            head_mask,
+            inputs_embeds,
+            output_attentions,
+            output_hidden_states,
+            return_dict,
+        )
+        discriminator_sequence_output = discriminator_hidden_states[0]
+        logits = self.discriminator_predictions(discriminator_sequence_output)
+        return logits
 
 
 def tie_weights(generator, discriminator):
@@ -255,7 +292,8 @@ def collate_batch(examples, pad_token_id):
     return input_ids, input_mask
 
 
-def train(args, train_dataset, eval_dataset, model, generator, discriminator, tokenizer, optimizer, pad_token_id, logger):
+def train(args, train_dataset, eval_dataset, model, generator, discriminator, tokenizer, optimizer, pad_token_id,
+          logger):
     """ Train the model """
     if args.local_rank in [-1, 0]:
         tb_writer = SummaryWriter()

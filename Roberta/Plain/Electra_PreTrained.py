@@ -3,8 +3,8 @@ import argparse
 from collections import namedtuple
 import torch
 import os
-from ElectraUtil import tie_weights, set_seed, Electra, LogitsAdapter, train
-from transformers import RobertaTokenizer, RobertaForMaskedLM, AdamW, ElectraForPreTraining, AutoConfig
+from ElectraUtil import tie_weights, set_seed, Electra, LogitsAdapter, train, ElectraForPreTraining
+from transformers import RobertaTokenizer, RobertaForMaskedLM, AdamW, AutoConfig
 from tokenizers import ByteLevelBPETokenizer
 import pandas as pd
 import re
