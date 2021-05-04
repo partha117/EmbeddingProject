@@ -295,7 +295,7 @@ if __name__ == "__main__":
         Path(root_path + "/tokenizer/").mkdir(parents=True, exist_ok=True)
         tokenizer.save_model(root_path + "/tokenizer/", "./aster")
     tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
-    temp_dataset = BugDataset(scratch_path + "partha9/Data/Java_Train_Data.csv")
+    temp_dataset = BugDataset(file_path=scratch_path + "partha9/Data/Java_Train_Data.csv",tokenizer=tokenizer)
 
 
     # Setup distant debugging if needed
