@@ -59,7 +59,7 @@ def get_mask_subset_with_prob(mask, prob):
 class ElectraForPreTraining(BertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
-        self.electra = AutoModel(config)
+        self.electra = AutoModel.from_config(config)
         self.discriminator_predictions = ElectraDiscriminatorPredictions(config)
         self.init_weights()
 
