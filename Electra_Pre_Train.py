@@ -12,7 +12,6 @@ from torch import nn
 import torch.nn.functional as F
 
 from tqdm import tqdm, trange
-from electra_pytorch import Electra
 import torch.nn as nn
 import numpy as np
 import torch
@@ -28,24 +27,6 @@ from tqdm import tqdm, trange
 from transformers import RobertaTokenizer, RobertaForMaskedLM, RobertaModel, BertPreTrainedModel, AutoConfig, \
     get_linear_schedule_with_warmup, AdamW
 
-# from utils import (compute_metrics, convert_examples_to_features,
-#                         output_modes, processors)
-
-logger = logging.getLogger(__name__)
-
-# MODEL_CLASSES = {'roberta': (RobertaConfig, RobertaForSequenceClassification, RobertaTokenizer)}
-Results = namedtuple('Results', [
-    'loss',
-    'mlm_loss',
-    'disc_loss',
-    'gen_acc',
-    'disc_acc',
-    'disc_labels',
-    'disc_predictions'
-])
-
-
-# helpers
 
 def log(t, eps=1e-9):
     return torch.log(t + eps)
@@ -86,8 +67,6 @@ def get_mask_subset_with_prob(mask, prob):
     new_mask.scatter_(-1, sampled_indices, 1)
     return new_mask[:, 1:].bool()
 
-
-# hidden layer extractor class, for magically adding adapter to language model to be pretrained
 
 class HiddenLayerExtractor(nn.Module):
     def __init__(self, net, layer=-2):
@@ -840,4 +819,14 @@ def main():
 
 
 if __name__ == "__main__":
+    logger = logging.getLogger(__name__)
+    Results = namedtuple('Results', [
+        'loss',
+        'mlm_loss',
+        'disc_loss',
+        'gen_acc',
+        'disc_acc',
+        'disc_labels',
+        'disc_predictions'
+    ])
     main()
