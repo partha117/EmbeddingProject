@@ -285,10 +285,10 @@ def set_seed(args):
 
 
 def collate_batch(examples, pad_token_id):
-    print(examples[0][0])
-    input_ids = torch.nn.utils.rnn.pad_sequence([example[0] for example in examples], batch_first=True,
+    #print(examples[0][0])
+    input_ids = torch.nn.utils.rnn.pad_sequence([example['input_ids'] for example in examples], batch_first=True,
                                                 padding_value=pad_token_id)
-    input_mask = torch.nn.utils.rnn.pad_sequence([example[1] for example in examples], batch_first=True,
+    input_mask = torch.nn.utils.rnn.pad_sequence([example['attention_mask'] for example in examples], batch_first=True,
                                                  padding_value=pad_token_id)
     return input_ids, input_mask
 
