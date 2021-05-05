@@ -28,11 +28,11 @@ def build_lib():
 
 
 def create_java_only_dataset():
-    if not os.path.isfile(scratch_path + "partha9/Data/Java_Unified_Data_with_SHA.csv"):
-        df = pd.read_csv(scratch_path + "partha9/Data/Unified_Data_with_SHA.csv")
+    if not os.path.isfile(scratch_path + "Data/Java_Unified_Data_with_SHA.csv"):
+        df = pd.read_csv(scratch_path + "Data/Unified_Data_with_SHA.csv")
         df2 = df[df["language_name"] == 'Java']
         df2.reset_index(drop=True, inplace=True)
-        df2.to_csv(scratch_path + "partha9/Data/Java_Unified_Data_with_SHA.csv", index=False)
+        df2.to_csv(scratch_path + "Data/Java_Unified_Data_with_SHA.csv", index=False)
 
 
 def get_uuid(text):
@@ -59,12 +59,12 @@ def remove_comments_and_docstrings(source):
 
 
 def create_report_files():
-    if not os.path.isdir(scratch_path + "partha9/Data/Report_Files/"):
-        Path(scratch_path + "partha9/Data/Report_Files/").mkdir(parents=True, exist_ok=True)
-        df = pd.read_csv(scratch_path + "partha9/Data/Java_Unified_Data_with_SHA.csv")
+    if not os.path.isdir(scratch_path + "Data/Report_Files/"):
+        Path(scratch_path + "Data/Report_Files/").mkdir(parents=True, exist_ok=True)
+        df = pd.read_csv(scratch_path + "Data/Java_Unified_Data_with_SHA.csv")
         for item in df.iterrows():
             uuid_name = item[1]['before_fix_uuid_file_path'].split("/")[-1].split(".")[0]
-            file = open(scratch_path + "partha9/Data/Report_Files/{}.txt".format(uuid_name), "w")
+            file = open(scratch_path + "Data/Report_Files/{}.txt".format(uuid_name), "w")
             file.write(item[1]['title'] + " " + item[1]['description'])
             file.close()
 
@@ -92,10 +92,10 @@ def save_file(path, item):
 
 
 def create_ast_files():
-    if not os.path.isdir(scratch_path + "partha9/Data/AST_Files/"):
-        Path(scratch_path + "partha9/Data/AST_Files/").mkdir(parents=True, exist_ok=True)
-        df = pd.read_csv(scratch_path + "partha9/Data/Java_Unified_Data_with_SHA.csv")
-        path = scratch_path + "partha9/"
+    if not os.path.isdir(scratch_path + "Data/AST_Files/"):
+        Path(scratch_path + "Data/AST_Files/").mkdir(parents=True, exist_ok=True)
+        df = pd.read_csv(scratch_path + "Data/Java_Unified_Data_with_SHA.csv")
+        path = scratch_path + ""
         Parallel(n_jobs=-1)(  # Uses all cores but one
             delayed(save_file)(path, item)
             for item in df.iterrows()
@@ -140,15 +140,15 @@ class BugDataset(Dataset):
             idx = idx.tolist()
         rows = self.dataset.iloc[idx, :]
         if isinstance(idx, int):
-            before_fix_ast_path = scratch_path + "partha9/Data/AST_Files/" + get_uuid(
+            before_fix_ast_path = scratch_path + "Data/AST_Files/" + get_uuid(
                 rows['before_fix_uuid_file_path']) + ".txt"
-            report_files = scratch_path + "partha9/Data/Report_Files/" + get_uuid(
+            report_files = scratch_path + "Data/Report_Files/" + get_uuid(
                 rows['before_fix_uuid_file_path']) + ".txt"
         else:
             before_fix_ast_path = rows['before_fix_uuid_file_path'].map(
-                lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
+                lambda x: scratch_path + "Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
             report_files = rows['before_fix_uuid_file_path'].map(
-                lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
+                lambda x: scratch_path + "Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
         temp = file_reader(before_fix_ast_path, report_files)
         return \
             self.tokenizer.encode_plus(temp, truncation=True, max_length=512, padding=True, pad_to_multiple_of=512)
@@ -265,22 +265,25 @@ if __name__ == "__main__":
         'disc_predictions'
     ])
 
+    is_cedar = True
     build_lib()
     scratch_path = "/scratch/"
+    if not is_cedar:
+        scratch_path += "partha9/"
     root_path = "/project/def-m2nagapp/partha9/Aster/Roberta_Extended_Electra/"
     Path(root_path).mkdir(parents=True, exist_ok=True)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     create_java_only_dataset()
     create_report_files()
     create_ast_files()
-    train_data, val_data = train_test_split(pd.read_csv(scratch_path + "partha9/Data/Java_Train_Data.csv"),
+    train_data, val_data = train_test_split(pd.read_csv(scratch_path + "Data/Java_Train_Data.csv"),
                                             test_size=0.125)
     before_fix_ast_paths = train_data['before_fix_uuid_file_path'].map(
-        lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
+        lambda x: scratch_path + "Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
     after_fix_ast_paths = train_data['after_fix_uuid_file_path'].map(
-        lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
+        lambda x: scratch_path + "Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
     report_files = train_data['before_fix_uuid_file_path'].map(
-        lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
+        lambda x: scratch_path + "Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
     all_file_path = before_fix_ast_paths + report_files
     if not os.path.isfile(root_path + "/tokenizer/aster-vocab.json"):
         tokenizer = ByteLevelBPETokenizer()
@@ -294,7 +297,7 @@ if __name__ == "__main__":
         Path(root_path + "/tokenizer/").mkdir(parents=True, exist_ok=True)
         tokenizer.save_model(root_path + "/tokenizer/", "./aster")
     tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
-    temp_dataset = BugDataset(file_path=scratch_path + "partha9/Data/Java_Train_Data.csv",tokenizer=tokenizer)
+    temp_dataset = BugDataset(file_path=scratch_path + "Data/Java_Train_Data.csv",tokenizer=tokenizer)
 
 
     # Setup distant debugging if needed
