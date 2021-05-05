@@ -265,7 +265,7 @@ if __name__ == "__main__":
         'disc_predictions'
     ])
 
-    is_cedar = True
+    is_cedar = False
     build_lib()
     scratch_path = "/scratch/"
     if not is_cedar:
