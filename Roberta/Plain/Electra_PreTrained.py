@@ -4,7 +4,7 @@ from collections import namedtuple
 import torch
 import os
 from ElectraUtil import tie_weights, set_seed, Electra, LogitsAdapter, train, ElectraForPreTraining
-from transformers import RobertaTokenizer, RobertaForMaskedLM, AdamW, AutoConfig
+from transformers import RobertaTokenizer, RobertaForMaskedLM, AdamW, AutoConfig, AutoModelForMaskedLM
 from tokenizers import ByteLevelBPETokenizer
 import pandas as pd
 import re
@@ -358,7 +358,7 @@ if __name__ == "__main__":
         tokenizer_name = 'roberta-base'
     tokenizer = RobertaTokenizer.from_pretrained(tokenizer_name)
     logger.info("Tokenizer loaded {}".format(tokenizer_name))
-    generator = RobertaForMaskedLM.from_pretrained(args.gen_model_name_or_path)
+    generator = AutoModelForMaskedLM.from_pretrained(args.gen_model_name_or_path)
     for param in generator.roberta.parameters():
         param.requires_grad = False
     logger.info("Generator {}".format(generator.config._name_or_path))
