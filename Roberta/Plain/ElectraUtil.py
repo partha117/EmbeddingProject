@@ -412,81 +412,34 @@ def train(args, train_dataset, eval_dataset, model, generator, discriminator, to
                 logger.info(" Training: Total Loss = %s, Generator loss = %s,Discriminator Loss = %s",tr_loss,tr_loss_mlm,tr_loss_disc)
                 logger.info(" Training: Generator Accuracy = %s,Discriminator Accuracy = %s",tr_acc_gen,tr_acc_disc)
 
-        # if args.do_eval and (args.local_rank == -1 or torch.distributed.get_rank() == 0):
-        #     results = evaluate(args, eval_dataset, model, tokenizer, pad_token_id, prefix=idx,
-        #                        checkpoint=str(args.start_epoch + idx))
-        #
-        #     last_output_dir = os.path.join(args.output_dir, 'checkpoint-last')
-        #     if not os.path.exists(last_output_dir):
-        #         os.makedirs(last_output_dir)
-        #     generator_path = os.path.join(last_output_dir, 'generator')
-        #     discriminator_path = os.path.join(last_output_dir, 'discriminator')
-        #     gen_model_to_save = generator.module if hasattr(generator,
-        #                                                     'module') else generator  # Take care of distributed/parallel training
-        #     disc_model_to_save = discriminator.module if hasattr(discriminator,
-        #                                                          'module') else discriminator
-        #     gen_model_to_save.roberta.save_pretrained(generator_path)
-        #     disc_model_to_save.electra.save_pretrained(discriminator_path)
-        #     logger.info("Saving model checkpoint to %s", last_output_dir)
-        #     idx_file = os.path.join(last_output_dir, 'idx_file.txt')
-        #     with open(idx_file, 'w', encoding='utf-8') as idxf:
-        #         idxf.write(str(args.start_epoch + idx) + '\n')
-        #
-        #     torch.save(optimizer.state_dict(), os.path.join(last_output_dir, "optimizer.pt"))
-        #     torch.save(scheduler.state_dict(), os.path.join(last_output_dir, "scheduler.pt"))
-        #     logger.info("Saving optimizer and scheduler states to %s", last_output_dir)
-        #
-        #     step_file = os.path.join(last_output_dir, 'step_file.txt')
-        #     with open(step_file, 'w', encoding='utf-8') as stepf:
-        #         stepf.write(str(global_step) + '\n')
-        #
-        #     if (results['acc_disc'] > best_acc):
-        #         best_acc = results['acc_disc']
-        #         output_dir = os.path.join(args.output_dir, 'checkpoint-best')
-        #         if not os.path.exists(output_dir):
-        #             os.makedirs(output_dir)
-        #         generator_path = os.path.join(output_dir, 'generator')
-        #         discriminator_path = os.path.join(output_dir, 'discriminator')
-        #         gen_model_to_save = generator.module if hasattr(generator,
-        #                                                         'module') else generator  # Take care of distributed/parallel training
-        #         disc_model_to_save = discriminator.module if hasattr(discriminator,
-        #                                                              'module') else discriminator
-        #         gen_model_to_save.roberta.save_pretrained(generator_path)
-        #         disc_model_to_save.electra.save_pretrained(discriminator_path)
-        #         torch.save(args, os.path.join(output_dir, 'training_{}.bin'.format(idx)))
-        #         logger.info("Saving model checkpoint to %s", output_dir)
-        #
-        #         torch.save(optimizer.state_dict(), os.path.join(output_dir, "optimizer.pt"))
-        #         torch.save(scheduler.state_dict(), os.path.join(output_dir, "scheduler.pt"))
-        #         logger.info("Saving optimizer and scheduler states to %s", output_dir)
 
         if args.max_steps > 0 and global_step > args.max_steps:
             train_iterator.close()
             break
 
-    last_output_dir = os.path.join(args.output_dir, 'checkpoint-{}'.format(idx))
-    if not os.path.exists(last_output_dir):
-        os.makedirs(last_output_dir)
-    generator_path = os.path.join(last_output_dir, 'generator')
-    discriminator_path = os.path.join(last_output_dir, 'discriminator')
-    gen_model_to_save = generator.module if hasattr(generator,
-                                                    'module') else generator  # Take care of distributed/parallel training
-    disc_model_to_save = discriminator.module if hasattr(discriminator,
-                                                         'module') else discriminator
-    gen_model_to_save.roberta.save_pretrained(generator_path)
-    disc_model_to_save.electra.save_pretrained(discriminator_path)
-    logger.info("Saving model checkpoint to %s", last_output_dir)
-    idx_file = os.path.join(last_output_dir, 'idx_file.txt')
-    with open(idx_file, 'w', encoding='utf-8') as idxf:
-        idxf.write(str(args.start_epoch + idx) + '\n')
+        last_output_dir = os.path.join(args.output_dir, 'checkpoint-{}'.format(idx))
+        if not os.path.exists(last_output_dir):
+            os.makedirs(last_output_dir)
+        generator_path = os.path.join(last_output_dir, 'generator')
+        discriminator_path = os.path.join(last_output_dir, 'discriminator')
+        gen_model_to_save = generator.module if hasattr(generator,
+                                                        'module') else generator  # Take care of distributed/parallel training
+        disc_model_to_save = discriminator.module if hasattr(discriminator,
+                                                             'module') else discriminator
+        gen_model_to_save.roberta.save_pretrained(generator_path)
+        disc_model_to_save.electra.save_pretrained(discriminator_path)
+        logger.info("Saving model checkpoint to %s", last_output_dir)
+        idx_file = os.path.join(last_output_dir, 'idx_file.txt')
+        with open(idx_file, 'w', encoding='utf-8') as idxf:
+            idxf.write(str(args.start_epoch + idx) + '\n')
 
-    torch.save(optimizer.state_dict(), os.path.join(last_output_dir, "optimizer.pt"))
-    torch.save(scheduler.state_dict(), os.path.join(last_output_dir, "scheduler.pt"))
-    logger.info("Saving optimizer and scheduler states to %s", last_output_dir)
+        torch.save(optimizer.state_dict(), os.path.join(last_output_dir, "optimizer.pt"))
+        torch.save(scheduler.state_dict(), os.path.join(last_output_dir, "scheduler.pt"))
+        logger.info("Saving optimizer and scheduler states to %s", last_output_dir)
 
-    step_file = os.path.join(last_output_dir, 'step_file.txt')
-    with open(step_file, 'w', encoding='utf-8') as stepf:
-        stepf.write(str(global_step) + '\n')
+        step_file = os.path.join(last_output_dir, 'step_file.txt')
+        with open(step_file, 'w', encoding='utf-8') as stepf:
+            stepf.write(str(global_step) + '\n')
     if args.local_rank in [-1, 0]:
         tb_writer.close()
 
