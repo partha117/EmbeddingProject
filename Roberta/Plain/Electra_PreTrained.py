@@ -127,7 +127,7 @@ class BugDataset(Dataset):
 
     def __init__(self, file_path=None, dataframe=None, tokenizer=None):
         if file_path is not None:
-            self.dataset = pd.read_csv(file_path)
+            self.dataset = pd.read_csv(file_path).sample(frac=0.315, random_state=13)
         else:
             self.dataset = dataframe
         self.tokenizer = tokenizer
@@ -224,7 +224,7 @@ if __name__ == "__main__":
                         help="Overwrite the content of the output directory")
     parser.add_argument('--overwrite_cache', action='store_true',
                         help="Overwrite the cached training and evaluation sets")
-    parser.add_argument('--seed', type=int, default=42,
+    parser.add_argument('--seed', type=int, default=13,
                         help="random seed for initialization")
 
     parser.add_argument('--fp16', action='store_true',
