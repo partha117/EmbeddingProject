@@ -127,7 +127,7 @@ class BugDataset(Dataset):
 
     def __init__(self, file_path=None, dataframe=None, tokenizer=None):
         if file_path is not None:
-            self.dataset = pd.read_csv(file_path).sample(frac=0.315, random_state=13)
+            self.dataset = pd.read_csv(file_path)# .sample(frac=0.315, random_state=13)
         else:
             self.dataset = dataframe
         self.tokenizer = tokenizer
