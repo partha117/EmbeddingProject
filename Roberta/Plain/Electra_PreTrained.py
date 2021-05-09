@@ -3,7 +3,7 @@ import argparse
 from collections import namedtuple
 import torch
 import os
-from ElectraUtil import tie_weights, set_seed, Electra, LogitsAdapter, train, ElectraForPreTraining
+from ElectraUtil import tie_weights, set_seed, Electra, LogitsAdapter, train, ElectraForPreTraining, return_sorted
 from transformers import RobertaTokenizer, RobertaForMaskedLM, AdamW, AutoConfig, AutoModelForMaskedLM
 from tokenizers import ByteLevelBPETokenizer
 import pandas as pd
@@ -298,6 +298,8 @@ if __name__ == "__main__":
         tokenizer.save_model(root_path + "/tokenizer/", "./aster")
     tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
     temp_dataset = BugDataset(file_path=scratch_path + "Data/Java_Train_Data.csv",tokenizer=tokenizer)
+    latest_checkpoint, start_from = return_sorted(args.output_dir,lambda x: int(x.split("checkpoint-")[-1]) if re.search(r'checkpoint-\d+', x) else None, return_last=True)
+    latest_checkpoint = os.path.join(args.output_dir, latest_checkpoint) if latest_checkpoint is not None else latest_checkpoint
 
 
     # Setup distant debugging if needed
@@ -336,7 +338,7 @@ if __name__ == "__main__":
 
     args.start_epoch = 0
     args.start_step = 0
-    checkpoint_last = os.path.join(args.output_dir, 'checkpoint-last')
+    checkpoint_last = os.path.join(args.output_dir, latest_checkpoint) if latest_checkpoint is not None else os.path.join(args.output_dir, 'checkpoint-last')
     if os.path.exists(checkpoint_last) and os.listdir(checkpoint_last):
         args.gen_model_name_or_path = os.path.join(checkpoint_last, 'generator')
         logger.info("Generator Last Checkpoint {}", args.gen_model_name_or_path)

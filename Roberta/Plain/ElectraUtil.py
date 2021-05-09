@@ -288,12 +288,30 @@ def set_seed(args):
 
 
 def collate_batch(examples, pad_token_id):
-    #print(examples[0][0])
-    input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(example['input_ids']) for example in examples], batch_first=True,
+    # print(examples[0][0])
+    input_ids = torch.nn.utils.rnn.pad_sequence([torch.tensor(example['input_ids']) for example in examples],
+                                                batch_first=True,
                                                 padding_value=pad_token_id)
-    input_mask = torch.nn.utils.rnn.pad_sequence([torch.tensor(example['attention_mask']) for example in examples], batch_first=True,
+    input_mask = torch.nn.utils.rnn.pad_sequence([torch.tensor(example['attention_mask']) for example in examples],
+                                                 batch_first=True,
                                                  padding_value=pad_token_id)
     return input_ids, input_mask
+
+
+def return_sorted(path, function, return_last=False, return_first=False):
+    name_store = dict()
+    for item in os.listdir(path):
+        if function(item):
+            name_store[function(item)] = item
+    name_store = dict(sorted(name_store.items()))
+    if len(name_store.keys()) > 0:
+        if return_last:
+            return name_store[list(name_store.keys())[-1]], list(name_store.keys())[-1]
+        elif return_first:
+            return name_store[list(name_store.keys())[0]], list(name_store.keys())[0]
+        return name_store
+    else:
+        return None, 0
 
 
 def train(args, train_dataset, eval_dataset, model, generator, discriminator, tokenizer, optimizer, pad_token_id,
@@ -409,9 +427,9 @@ def train(args, train_dataset, eval_dataset, model, generator, discriminator, to
             for key in sorted(results.keys()):
                 logger.info("  %s = %s", key, str(results[key]))
                 writer.write("%s = %s\n" % (key, str(results[key])))
-                logger.info(" Training: Total Loss = %s, Generator loss = %s,Discriminator Loss = %s",tr_loss,tr_loss_mlm,tr_loss_disc)
-                logger.info(" Training: Generator Accuracy = %s,Discriminator Accuracy = %s",tr_acc_gen,tr_acc_disc)
-
+                logger.info(" Training: Total Loss = %s, Generator loss = %s,Discriminator Loss = %s", tr_loss,
+                            tr_loss_mlm, tr_loss_disc)
+                logger.info(" Training: Generator Accuracy = %s,Discriminator Accuracy = %s", tr_acc_gen, tr_acc_disc)
 
         if args.max_steps > 0 and global_step > args.max_steps:
             train_iterator.close()
