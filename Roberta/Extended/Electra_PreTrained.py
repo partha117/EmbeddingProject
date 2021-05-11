@@ -360,7 +360,7 @@ if __name__ == "__main__":
         tokenizer_name = 'roberta-base'
     tokenizer = RobertaTokenizer.from_pretrained(tokenizer_name)
     logger.info("Tokenizer loaded {}".format(tokenizer_name))
-    generator = AutoModelForMaskedLM.from_pretrained(args.gen_model_name_or_path) if latest_checkpoint is not None else AutoModelForMaskedLM(config=AutoConfig.from_pretrained(args.dis_model_name_or_path))
+    generator = AutoModelForMaskedLM.from_pretrained(args.gen_model_name_or_path) if latest_checkpoint is not None else AutoModelForMaskedLM.from_config(config=AutoConfig.from_pretrained(args.dis_model_name_or_path))
     for param in generator.roberta.parameters():
         param.requires_grad = False
     logger.info("Generator {}".format(generator.config._name_or_path))
