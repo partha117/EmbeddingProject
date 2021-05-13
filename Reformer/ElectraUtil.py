@@ -96,9 +96,9 @@ def tie_weights(generator, discriminator):
     # generator.roberta.embeddings.word_embeddings = discriminator.electra.embeddings.word_embeddings
     # generator.roberta.embeddings.position_embeddings = discriminator.electra.embeddings.position_embeddings
     # generator.roberta.embeddings.token_type_embeddings = discriminator.electra.embeddings.token_type_embeddings
-    discriminator.electra.embeddings.word_embeddings = generator.roberta.embeddings.word_embeddings
-    discriminator.electra.embeddings.position_embeddings = generator.roberta.embeddings.position_embeddings
-    discriminator.electra.embeddings.token_type_embeddings = generator.roberta.embeddings.token_type_embeddings
+    discriminator.electra.embeddings.word_embeddings = generator.reformer.embeddings.word_embeddings
+    discriminator.electra.embeddings.position_embeddings = generator.reformer.embeddings.position_embeddings
+    discriminator.electra.embeddings.token_type_embeddings = generator.reformer.embeddings.token_type_embeddings
 
 
 class LogitsAdapter(torch.nn.Module):
@@ -444,7 +444,7 @@ def train(args, train_dataset, eval_dataset, model, generator, discriminator, to
                                                         'module') else generator  # Take care of distributed/parallel training
         disc_model_to_save = discriminator.module if hasattr(discriminator,
                                                              'module') else discriminator
-        gen_model_to_save.roberta.save_pretrained(generator_path)
+        gen_model_to_save.reformer.save_pretrained(generator_path)
         disc_model_to_save.electra.save_pretrained(discriminator_path)
         logger.info("Saving model checkpoint to %s", last_output_dir)
         idx_file = os.path.join(last_output_dir, 'idx_file.txt')

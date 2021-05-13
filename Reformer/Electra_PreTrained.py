@@ -270,7 +270,7 @@ if __name__ == "__main__":
     scratch_path = "/scratch/"
     if not is_cedar:
         scratch_path += "partha9/"
-    root_path = "/project/def-m2nagapp/partha9/Aster/Extended_Roberta_Electra/"
+    root_path = "/project/def-m2nagapp/partha9/Aster/Reformer_Electra/"
     Path(root_path).mkdir(parents=True, exist_ok=True)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     create_java_only_dataset()
@@ -361,7 +361,7 @@ if __name__ == "__main__":
     tokenizer = RobertaTokenizer.from_pretrained(tokenizer_name)
     logger.info("Tokenizer loaded {}".format(tokenizer_name))
     generator = AutoModelForMaskedLM.from_pretrained(args.gen_model_name_or_path) if latest_checkpoint is not None else AutoModelForMaskedLM.from_config(config=AutoConfig.from_pretrained(args.dis_model_name_or_path))
-    for param in generator.roberta.parameters():
+    for param in generator.reformer.parameters():
         param.requires_grad = False
     logger.info("Generator {}".format(generator.config._name_or_path))
     discriminator = ElectraForPreTraining(AutoConfig.from_pretrained(args.dis_model_name_or_path))
@@ -447,6 +447,6 @@ if __name__ == "__main__":
                                                         'module') else generator  # Take care of distributed/parallel training
         disc_model_to_save = discriminator.module if hasattr(discriminator,
                                                              'module') else discriminator
-        gen_model_to_save.roberta.save_pretrained(generator_path)
+        gen_model_to_save.reformer.save_pretrained(generator_path)
         disc_model_to_save.electra.save_pretrained(discriminator_path)
         torch.save(args, os.path.join(args.output_dir, 'training_args.bin'))
