@@ -38,7 +38,7 @@ if __name__ == "__main__":
                         help="Name to save")
     parser.add_argument("--max_embedding", default=None,
                         help="Maximum embedding size")
-    parser.add_argument("--axial_pos_shape", default=None,
+    parser.add_argument("--axial_pos_shape", default=None,nargs='+',
                         help="Axial position shape")
     args = parser.parse_args()
     if args.task_name == 'config':
