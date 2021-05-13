@@ -5,7 +5,7 @@ from transformers import AdamW, RobertaModel, AutoModel, RobertaTokenizer, AutoM
 import argparse
 
 
-def save_config(name, save_name, max_embedding=None,axial_pos_shape=None):
+def save_config(name, save_name, max_embedding=None, axial_pos_shape=None):
     params = {}
     if max_embedding:
         params = {"max_position_embeddings": int(max_embedding)}
@@ -42,6 +42,7 @@ if __name__ == "__main__":
     parser.add_argument("--axial_pos_shape", default=None,nargs='+',
                         help="Axial position shape")
     args = parser.parse_args()
+    print(args)
     if args.task_name == 'config':
         save_config(args.name, args.save_name, args.max_embedding, args.axial_pos_shape)
     elif args.task_name == 'tokenizer':
