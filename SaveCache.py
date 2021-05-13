@@ -10,7 +10,7 @@ def save_config(name, save_name, max_embedding=None,axial_pos_shape=None):
     if max_embedding:
         params = {"max_position_embeddings": int(max_embedding)}
     if axial_pos_shape:
-        params = {"max_position_embeddings": tuple(axial_pos_shape)}
+        params = {"axial_pos_shape": tuple(axial_pos_shape)}
     if len(params.keys()) > 0:
         config = AutoConfig.from_pretrained(name, **params)
     else:
