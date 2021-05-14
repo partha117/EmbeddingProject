@@ -98,7 +98,7 @@ def tie_weights(generator, discriminator):
     # generator.roberta.embeddings.token_type_embeddings = discriminator.electra.embeddings.token_type_embeddings
     discriminator.electra.embeddings.word_embeddings = generator.reformer.embeddings.word_embeddings
     discriminator.electra.embeddings.position_embeddings = generator.reformer.embeddings.position_embeddings
-    discriminator.electra.embeddings.token_type_embeddings = generator.reformer.embeddings.token_type_embeddings
+    #discriminator.electra.embeddings.token_type_embeddings = generator.reformer.embeddings.token_type_embeddings
 
 
 class LogitsAdapter(torch.nn.Module):
