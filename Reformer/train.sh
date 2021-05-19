@@ -21,7 +21,7 @@ python /home/partha9/EmbeddingProject/Reformer/Electra_PreTrained.py --do_train 
 --gradient_accumulation_steps 1 \
 --overwrite_output_dir \
 --gen_model_name_or_path /project/6033386/partha9/model_cache/reformer_model \
---dis_model_name_or_path /project/6033386/partha9/model_cache/reformer_4096_config \
+--dis_model_name_or_path /project/6033386/partha9/model_cache/reformer_2048_config \
 --tokenizer_name /project/6033386/partha9/model_cache/roberta_tokenizer \
 --fp16 \
 --output_dir /project/def-m2nagapp/partha9/Aster/Reformer_Electra/
