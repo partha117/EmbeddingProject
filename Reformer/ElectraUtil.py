@@ -368,7 +368,7 @@ def train(args, train_dataset, eval_dataset, model, generator, discriminator, to
 
             batch = tuple(t.to(args.device) for t in batch)
             print("Here it is")
-            print(batch[0])
+            print(batch[0].shape)
             print("------------------")
             print(batch[0][0])
             loss, loss_mlm, loss_disc, acc_gen, acc_disc, disc_labels, disc_pred = model(batch[0],
