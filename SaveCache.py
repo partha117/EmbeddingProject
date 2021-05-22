@@ -6,10 +6,10 @@ import argparse
 
 
 def save_config(name, save_name, max_embedding=None, axial_pos_shape=None):
-    params = {"vocab_size":30000}
+    params = {"vocab_size": 30000}
     if max_embedding:
         params["max_position_embeddings"] =  int(max_embedding)
-        params["feed_forward_size"] = int(max_embedding)
+        #params["feed_forward_size"] = int(max_embedding)
     if axial_pos_shape:
         params["axial_pos_shape"] = (int(axial_pos_shape[0]), int(axial_pos_shape[1]))
 
