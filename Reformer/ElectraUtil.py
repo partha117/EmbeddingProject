@@ -234,7 +234,7 @@ class Electra(nn.Module):
         # get generator output and get mlm loss
         print("----------------")
         print(kwargs)
-        print(masked_input.shape)
+        print(masked_input.shape, torch.max(masked_input), torch.min(masked_input))
         logits = self.generator(masked_input, **kwargs)
         #         print("PRINTT",gen_labels,logits,gen_labels.shape,logits.shape)
 
@@ -372,7 +372,7 @@ def train(args, train_dataset, eval_dataset, model, generator, discriminator, to
             batch = tuple(t.to(args.device) for t in batch)
             print("Here it is")
             print(batch[0].shape, batch[1].shape)
-            print(torch.max(batch[0]))
+            print(torch.max(batch[0]), torch.min(batch[0]), torch.max(batch[0]), torch.max(batch[1]), torch.min(batch[1]))
             print("------------------")
             print(batch[0][0])
             loss, loss_mlm, loss_disc, acc_gen, acc_disc, disc_labels, disc_pred = model(batch[0],
