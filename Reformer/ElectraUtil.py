@@ -233,9 +233,6 @@ class Electra(nn.Module):
         # set inverse of mask to padding tokens for labels
         gen_labels = input.masked_fill(~mask, self.pad_token_id)
         # get generator output and get mlm loss
-        print("----------------")
-        print(kwargs)
-        print(masked_input.shape, torch.max(masked_input), torch.min(masked_input))
         logits = self.generator(masked_input, **kwargs)
         #         print("PRINTT",gen_labels,logits,gen_labels.shape,logits.shape)
 
@@ -262,6 +259,9 @@ class Electra(nn.Module):
         non_padded_indices = torch.nonzero(input != self.pad_token_id, as_tuple=True)
 
         # get discriminator output and binary cross entropy loss
+        print("----------------")
+        print(disc_input)
+        print(disc_input.shape)
         disc_logits = self.discriminator(disc_input, **kwargs)
         #         print("disc_logits shape",disc_logits.shape)
         disc_logits = disc_logits.reshape_as(disc_labels)
