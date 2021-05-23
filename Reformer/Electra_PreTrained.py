@@ -382,6 +382,7 @@ if __name__ == "__main__":
     cls_token_id = tokenizer.cls_token_id
     sep_token_id = tokenizer.sep_token_id
     vocab_size = tokenizer.vocab_size
+    print("Vocab size", vocab_size)
 
     model = Electra(
         LogitsAdapter(generator),

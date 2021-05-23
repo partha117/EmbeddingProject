@@ -224,6 +224,7 @@ class Electra(nn.Module):
             random_no_mask = mask_with_tokens(random_tokens, self.mask_ignore_token_ids)
             random_token_prob &= ~random_no_mask
             random_indices = torch.nonzero(random_token_prob, as_tuple=True)
+            print("Random", torch.max(random_indices),torch.min(random_indices))
             masked_input[random_indices] = random_tokens[random_indices]
 
         # [mask] input
