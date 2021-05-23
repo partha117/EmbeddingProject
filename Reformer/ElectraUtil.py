@@ -232,6 +232,9 @@ class Electra(nn.Module):
         # set inverse of mask to padding tokens for labels
         gen_labels = input.masked_fill(~mask, self.pad_token_id)
         # get generator output and get mlm loss
+        print("----------------")
+        print(kwargs)
+        print(masked_input.shape)
         logits = self.generator(masked_input, **kwargs)
         #         print("PRINTT",gen_labels,logits,gen_labels.shape,logits.shape)
 
