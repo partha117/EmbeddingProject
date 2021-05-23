@@ -156,7 +156,7 @@ class BugDataset(Dataset):
 
 
 if __name__ == "__main__":
-    os.environ['CUDA_LAUNCH_BLOCKING'] = 1
+    os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
     parser = argparse.ArgumentParser()
 
     ## Required parameters
