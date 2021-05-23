@@ -87,7 +87,9 @@ class ElectraForPreTraining(BertPreTrainedModel):
             output_hidden_states,
             return_dict,
         )
+        print("discriminator_hidden_states", discriminator_hidden_states.shape)
         discriminator_sequence_output = discriminator_hidden_states[0]
+        print("discriminator_sequence_output", discriminator_sequence_output.shape)
         logits = self.discriminator_predictions(discriminator_sequence_output)
         return logits
 
