@@ -73,7 +73,7 @@ class ElectraForPreTraining(BertPreTrainedModel):
             inputs_embeds=None,
             labels=None,
             output_attentions=None,
-            output_hidden_states=None,
+            output_hidden_states=True,
             return_dict=None,
     ):
         discriminator_hidden_states = self.electra(
