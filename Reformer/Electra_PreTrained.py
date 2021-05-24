@@ -367,6 +367,7 @@ if __name__ == "__main__":
     for param in generator.reformer.parameters():
         param.requires_grad = False
     logger.info("Generator {}".format(generator.config._name_or_path))
+    temp_config.output_hidden_states = True
     discriminator = ElectraForPreTraining(temp_config)
     logger.info(
         "Generator {} and Discriminator {}".format(generator.config._name_or_path, discriminator.config._name_or_path))
