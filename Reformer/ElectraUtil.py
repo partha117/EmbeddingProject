@@ -273,9 +273,6 @@ class Electra(nn.Module):
         non_padded_indices = torch.nonzero(input != self.pad_token_id, as_tuple=True)
 
         # get discriminator output and binary cross entropy loss
-        print("----------------")
-        print(disc_input)
-        print(disc_input.shape)
         disc_logits = self.discriminator(disc_input, **kwargs)
         #         print("disc_logits shape",disc_logits.shape)
         disc_logits = disc_logits.reshape_as(disc_labels)
@@ -385,11 +382,6 @@ def train(args, train_dataset, eval_dataset, model, generator, discriminator, to
         for step, batch in enumerate(train_dataloader):
 
             batch = tuple(t.to(args.device) for t in batch)
-            print("Here it is")
-            print(batch[0].shape, batch[1].shape)
-            print(torch.max(batch[0]), torch.min(batch[0]), torch.max(batch[0]), torch.max(batch[1]), torch.min(batch[1]))
-            print("------------------")
-            print(batch[0][0])
             loss, loss_mlm, loss_disc, acc_gen, acc_disc, disc_labels, disc_pred = model(batch[0],
                                                                                          attention_mask=batch[1])
 
