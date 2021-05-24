@@ -76,7 +76,20 @@ class ElectraForPreTraining(BertPreTrainedModel):
             output_hidden_states=True,
             return_dict=None,
     ):
-        discriminator_hidden_states = self.electra(
+        # discriminator_hidden_states = self.electra(
+        #     input_ids,
+        #     attention_mask,
+        #     token_type_ids,
+        #     position_ids,
+        #     head_mask,
+        #     inputs_embeds,
+        #     output_attentions,
+        #     output_hidden_states,
+        #     return_dict,
+        # )
+        # #print("discriminator_hidden_states", discriminator_hidden_states.shape)
+        # discriminator_sequence_output = discriminator_hidden_states[0]
+        discriminator_outputs = self.electra(
             input_ids,
             attention_mask,
             token_type_ids,
@@ -87,8 +100,8 @@ class ElectraForPreTraining(BertPreTrainedModel):
             output_hidden_states,
             return_dict,
         )
-        #print("discriminator_hidden_states", discriminator_hidden_states.shape)
-        discriminator_sequence_output = discriminator_hidden_states[0]
+        # print("discriminator_hidden_states", discriminator_hidden_states.shape)
+        discriminator_sequence_output = discriminator_outputs.hidden_states
         print("discriminator_sequence_output", discriminator_sequence_output.shape)
         logits = self.discriminator_predictions(discriminator_sequence_output)
         return logits
