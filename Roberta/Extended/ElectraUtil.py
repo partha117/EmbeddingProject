@@ -73,7 +73,7 @@ class ElectraForPreTraining(BertPreTrainedModel):
             inputs_embeds=None,
             labels=None,
             output_attentions=None,
-            output_hidden_states=None,
+            output_hidden_states=True,
             return_dict=None,
     ):
         discriminator_hidden_states = self.electra(
@@ -87,7 +87,8 @@ class ElectraForPreTraining(BertPreTrainedModel):
             output_hidden_states,
             return_dict,
         )
-        discriminator_sequence_output = discriminator_hidden_states[0]
+        #print("discriminator_hidden_states", discriminator_outputs, output_hidden_states)
+        discriminator_sequence_output = discriminator_outputs.hidden_states[0]
         logits = self.discriminator_predictions(discriminator_sequence_output)
         return logits
 
@@ -224,6 +225,7 @@ class Electra(nn.Module):
             random_no_mask = mask_with_tokens(random_tokens, self.mask_ignore_token_ids)
             random_token_prob &= ~random_no_mask
             random_indices = torch.nonzero(random_token_prob, as_tuple=True)
+            #print("Random", torch.max(random_indices),torch.min(random_indices))
             masked_input[random_indices] = random_tokens[random_indices]
 
         # [mask] input
