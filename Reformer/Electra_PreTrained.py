@@ -368,7 +368,7 @@ if __name__ == "__main__":
         param.requires_grad = False
     logger.info("Generator {}".format(generator.config._name_or_path))
     temp_config.output_hidden_states = True
-    discriminator = ElectraForPreTraining(temp_config)
+    discriminator = ElectraForPreTraining(temp_config) if latest_checkpoint is None else torch.load(args.dis_model_name_or_path )
     logger.info(
         "Generator {} and Discriminator {}".format(generator.config._name_or_path, discriminator.config._name_or_path))
 
