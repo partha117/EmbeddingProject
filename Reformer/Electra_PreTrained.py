@@ -341,9 +341,9 @@ if __name__ == "__main__":
     args.start_step = 0
     checkpoint_last = os.path.join(args.output_dir, latest_checkpoint) if latest_checkpoint is not None else os.path.join(args.output_dir, 'checkpoint-last')
     if os.path.exists(checkpoint_last) and os.listdir(checkpoint_last):
-        args.gen_model_name_or_path = os.path.join(checkpoint_last, 'generator')
+        args.gen_model_name_or_path = os.path.join(checkpoint_last, 'generator') + "/pytorch_model.bin"
         logger.info("Generator Last Checkpoint {}".format(args.gen_model_name_or_path))
-        args.dis_model_name_or_path = os.path.join(checkpoint_last, 'discriminator')
+        args.dis_model_name_or_path = os.path.join(checkpoint_last, 'discriminator') + "/pytorch_model.bin"
 
         idx_file = os.path.join(checkpoint_last, 'idx_file.txt')
         with open(idx_file, encoding='utf-8') as idxf:
@@ -363,7 +363,7 @@ if __name__ == "__main__":
     logger.info("Tokenizer loaded {}".format(tokenizer_name))
     temp_config = AutoConfig.from_pretrained(args.dis_model_name_or_path)
     temp_config.is_decoder = False
-    generator = AutoModelForMaskedLM.from_pretrained(args.gen_model_name_or_path) if latest_checkpoint is not None else AutoModelForMaskedLM.from_config(config=temp_config)
+    generator = torch.load(args.gen_model_name_or_path) if latest_checkpoint is not None else AutoModelForMaskedLM.from_config(config=temp_config)
     for param in generator.reformer.parameters():
         param.requires_grad = False
     logger.info("Generator {}".format(generator.config._name_or_path))
