@@ -76,7 +76,7 @@ class ElectraForPreTraining(BertPreTrainedModel):
             output_hidden_states=True,
             return_dict=None,
     ):
-        discriminator_hidden_states = self.electra(
+        discriminator_outputs = self.electra(
             input_ids,
             attention_mask,
             token_type_ids,
@@ -446,8 +446,10 @@ def train(args, train_dataset, eval_dataset, model, generator, discriminator, to
                                                         'module') else generator  # Take care of distributed/parallel training
         disc_model_to_save = discriminator.module if hasattr(discriminator,
                                                              'module') else discriminator
-        gen_model_to_save.roberta.save_pretrained(generator_path)
-        disc_model_to_save.electra.save_pretrained(discriminator_path)
+        #gen_model_to_save.save_pretrained(generator_path)
+        torch.save(gen_model_to_save, generator_path)
+        torch.save(disc_model_to_save,discriminator_path)
+        #disc_model_to_save.electra.save_pretrained(discriminator_path)
         logger.info("Saving model checkpoint to %s", last_output_dir)
         idx_file = os.path.join(last_output_dir, 'idx_file.txt')
         with open(idx_file, 'w', encoding='utf-8') as idxf:

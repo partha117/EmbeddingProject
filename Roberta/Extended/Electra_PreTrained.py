@@ -156,6 +156,7 @@ class BugDataset(Dataset):
 
 
 if __name__ == "__main__":
+    os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
     parser = argparse.ArgumentParser()
 
     ## Required parameters
@@ -339,6 +340,8 @@ if __name__ == "__main__":
     args.start_epoch = 0
     args.start_step = 0
     checkpoint_last = os.path.join(args.output_dir, latest_checkpoint) if latest_checkpoint is not None else os.path.join(args.output_dir, 'checkpoint-last')
+    temp_config = AutoConfig.from_pretrained(args.dis_model_name_or_path)
+    temp_config.is_decoder = False
     if os.path.exists(checkpoint_last) and os.listdir(checkpoint_last):
         args.gen_model_name_or_path = os.path.join(checkpoint_last, 'generator')
         logger.info("Generator Last Checkpoint {}".format(args.gen_model_name_or_path))
@@ -360,13 +363,12 @@ if __name__ == "__main__":
         tokenizer_name = 'roberta-base'
     tokenizer = RobertaTokenizer.from_pretrained(tokenizer_name)
     logger.info("Tokenizer loaded {}".format(tokenizer_name))
-    temp_config = AutoConfig.from_pretrained(args.dis_model_name_or_path)
-    generator = AutoModelForMaskedLM.from_pretrained(args.gen_model_name_or_path) if latest_checkpoint is not None else AutoModelForMaskedLM.from_config(config=temp_config)
+    generator = torch.load(args.gen_model_name_or_path) if latest_checkpoint is not None else AutoModelForMaskedLM.from_config(config=temp_config)
     for param in generator.reformer.parameters():
         param.requires_grad = False
     logger.info("Generator {}".format(generator.config._name_or_path))
     temp_config.output_hidden_states = True
-    discriminator = ElectraForPreTraining(temp_config)
+    discriminator = ElectraForPreTraining(temp_config) if latest_checkpoint is None else torch.load(args.dis_model_name_or_path)
     logger.info(
         "Generator {} and Discriminator {}".format(generator.config._name_or_path, discriminator.config._name_or_path))
 
@@ -381,6 +383,7 @@ if __name__ == "__main__":
     cls_token_id = tokenizer.cls_token_id
     sep_token_id = tokenizer.sep_token_id
     vocab_size = tokenizer.vocab_size
+    print("Vocab size", vocab_size)
 
     model = Electra(
         LogitsAdapter(generator),

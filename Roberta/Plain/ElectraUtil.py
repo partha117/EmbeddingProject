@@ -73,10 +73,10 @@ class ElectraForPreTraining(BertPreTrainedModel):
             inputs_embeds=None,
             labels=None,
             output_attentions=None,
-            output_hidden_states=None,
+            output_hidden_states=True,
             return_dict=None,
     ):
-        discriminator_hidden_states = self.electra(
+        discriminator_outputs = self.electra(
             input_ids,
             attention_mask,
             token_type_ids,
@@ -87,7 +87,8 @@ class ElectraForPreTraining(BertPreTrainedModel):
             output_hidden_states,
             return_dict,
         )
-        discriminator_sequence_output = discriminator_hidden_states[0]
+        #print("discriminator_hidden_states", discriminator_outputs, output_hidden_states)
+        discriminator_sequence_output = discriminator_outputs.hidden_states[0]
         logits = self.discriminator_predictions(discriminator_sequence_output)
         return logits
 
@@ -224,6 +225,7 @@ class Electra(nn.Module):
             random_no_mask = mask_with_tokens(random_tokens, self.mask_ignore_token_ids)
             random_token_prob &= ~random_no_mask
             random_indices = torch.nonzero(random_token_prob, as_tuple=True)
+            #print("Random", torch.max(random_indices),torch.min(random_indices))
             masked_input[random_indices] = random_tokens[random_indices]
 
         # [mask] input
@@ -444,8 +446,10 @@ def train(args, train_dataset, eval_dataset, model, generator, discriminator, to
                                                         'module') else generator  # Take care of distributed/parallel training
         disc_model_to_save = discriminator.module if hasattr(discriminator,
                                                              'module') else discriminator
-        gen_model_to_save.roberta.save_pretrained(generator_path)
-        disc_model_to_save.electra.save_pretrained(discriminator_path)
+        #gen_model_to_save.save_pretrained(generator_path)
+        torch.save(gen_model_to_save, generator_path)
+        torch.save(disc_model_to_save,discriminator_path)
+        #disc_model_to_save.electra.save_pretrained(discriminator_path)
         logger.info("Saving model checkpoint to %s", last_output_dir)
         idx_file = os.path.join(last_output_dir, 'idx_file.txt')
         with open(idx_file, 'w', encoding='utf-8') as idxf:
