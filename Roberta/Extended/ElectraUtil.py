@@ -94,12 +94,12 @@ class ElectraForPreTraining(BertPreTrainedModel):
 
 
 def tie_weights(generator, discriminator):
-    # generator.roberta.embeddings.word_embeddings = discriminator.electra.embeddings.word_embeddings
-    # generator.roberta.embeddings.position_embeddings = discriminator.electra.embeddings.position_embeddings
-    # generator.roberta.embeddings.token_type_embeddings = discriminator.electra.embeddings.token_type_embeddings
-    discriminator.electra.embeddings.word_embeddings = generator.roberta.embeddings.word_embeddings
-    discriminator.electra.embeddings.position_embeddings = generator.roberta.embeddings.position_embeddings
-    discriminator.electra.embeddings.token_type_embeddings = generator.roberta.embeddings.token_type_embeddings
+    generator.roberta.embeddings.word_embeddings = discriminator.electra.embeddings.word_embeddings
+    generator.roberta.embeddings.position_embeddings = discriminator.electra.embeddings.position_embeddings
+    generator.roberta.embeddings.token_type_embeddings = discriminator.electra.embeddings.token_type_embeddings
+    # discriminator.electra.embeddings.word_embeddings = generator.roberta.embeddings.word_embeddings
+    # discriminator.electra.embeddings.position_embeddings = generator.roberta.embeddings.position_embeddings
+    # discriminator.electra.embeddings.token_type_embeddings = generator.roberta.embeddings.token_type_embeddings
 
 
 class LogitsAdapter(torch.nn.Module):

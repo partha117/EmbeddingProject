@@ -1,4 +1,3 @@
-
 #!/bin/bash
 #SBATCH --account=def-m2nagapp
 #SBATCH --ntasks=1               # number of MPI processes
