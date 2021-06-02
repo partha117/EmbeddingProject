@@ -362,7 +362,9 @@ if __name__ == "__main__":
         tokenizer_name = 'roberta-base'
     tokenizer = RobertaTokenizer.from_pretrained(tokenizer_name)
     logger.info("Tokenizer loaded {}".format(tokenizer_name))
+    print("Latest Checkpoint", latest_checkpoint)
     generator = torch.load(args.gen_model_name_or_path) if latest_checkpoint is not None else AutoModelForMaskedLM.from_config(config=temp_config)
+    torch.save(generator,"test.pt")
     for param in generator.roberta.parameters():
         param.requires_grad = False
     logger.info("Generator {}".format(generator.config._name_or_path))
