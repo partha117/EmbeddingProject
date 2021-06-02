@@ -372,11 +372,7 @@ if __name__ == "__main__":
     logger.info(
         "Generator {} and Discriminator {}".format(generator.config._name_or_path, discriminator.config._name_or_path))
 
-    logger.info("Before")
-    torch.save(generator, "test.pt")
     tie_weights(generator, discriminator)
-    torch.save(generator, "test.pt")
-    logger.info("After")
 
     if args.local_rank == 0:
         torch.distributed.barrier()  # Make sure only the first process in distributed training will download model & vocab
@@ -413,14 +409,16 @@ if __name__ == "__main__":
     optimizer_last = os.path.join(checkpoint_last, 'optimizer.pt')
     if os.path.exists(optimizer_last):
         optimizer.load_state_dict(torch.load(optimizer_last))
-
+    logger.info("Before")
+    torch.save(generator,"test.pt")
     if args.fp16:
         try:
             from apex import amp
         except ImportError:
             raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
         model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
-
+    torch.save(generator, "test.pt")
+    logger.info("After")
     if args.n_gpu > 1:
         model = torch.nn.DataParallel(model)
 
@@ -437,6 +435,7 @@ if __name__ == "__main__":
         eval_dataset = temp_dataset # get_dataset(args.dev_file, args.max_seq_length, tokenizer)
         if not os.path.exists(args.output_dir) and args.local_rank in [-1, 0]:
             os.makedirs(args.output_dir)
+        torch.save(generator, "test.pt")
         global_step = train(args, train_dataset, eval_dataset, model, generator, discriminator, tokenizer, optimizer,
                             pad_token_id, logger)
         # logger.info(" global_step = %s, average loss = %s", global_step, tr_loss)
