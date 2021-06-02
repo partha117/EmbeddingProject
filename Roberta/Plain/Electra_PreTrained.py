@@ -364,7 +364,6 @@ if __name__ == "__main__":
     logger.info("Tokenizer loaded {}".format(tokenizer_name))
     print("Latest Checkpoint", latest_checkpoint)
     generator = torch.load(args.gen_model_name_or_path) if latest_checkpoint is not None else AutoModelForMaskedLM.from_config(config=temp_config)
-    torch.save(generator,"test.pt")
     for param in generator.roberta.parameters():
         param.requires_grad = False
     logger.info("Generator {}".format(generator.config._name_or_path))
@@ -373,7 +372,11 @@ if __name__ == "__main__":
     logger.info(
         "Generator {} and Discriminator {}".format(generator.config._name_or_path, discriminator.config._name_or_path))
 
+    logger.info("Before")
+    torch.save(generator, "test.pt")
     tie_weights(generator, discriminator)
+    torch.save(generator, "test.pt")
+    logger.info("After")
 
     if args.local_rank == 0:
         torch.distributed.barrier()  # Make sure only the first process in distributed training will download model & vocab
