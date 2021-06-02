@@ -319,7 +319,7 @@ def return_sorted(path, function, return_last=False, return_first=False):
 def train(args, train_dataset, eval_dataset, model, generator, discriminator, tokenizer, optimizer, pad_token_id,
           logger):
     """ Train the model """
-    torch.save(generator,"/home/partha9/projects/def-m2nagapp/partha9/Aster/temp/")
+    torch.save(generator,"/home/partha9/projects/def-m2nagapp/partha9/Aster/temp/test.pt")
     exit()
     if args.local_rank in [-1, 0]:
         tb_writer = SummaryWriter()
