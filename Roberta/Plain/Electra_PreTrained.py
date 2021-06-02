@@ -364,7 +364,7 @@ if __name__ == "__main__":
     tokenizer = RobertaTokenizer.from_pretrained(tokenizer_name)
     logger.info("Tokenizer loaded {}".format(tokenizer_name))
     generator = torch.load(args.gen_model_name_or_path) if latest_checkpoint is not None else AutoModelForMaskedLM.from_config(config=temp_config)
-    for param in generator.reformer.parameters():
+    for param in generator.roberta.parameters():
         param.requires_grad = False
     logger.info("Generator {}".format(generator.config._name_or_path))
     temp_config.output_hidden_states = True
