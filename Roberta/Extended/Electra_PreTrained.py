@@ -415,7 +415,8 @@ if __name__ == "__main__":
         except ImportError:
             raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
         model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
-
+    torch.save(generator,"test.pt")
+    logger.info("After")
     if args.n_gpu > 1:
         model = torch.nn.DataParallel(model)
 

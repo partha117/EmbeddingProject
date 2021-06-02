@@ -22,5 +22,4 @@ python /home/partha9/EmbeddingProject/Roberta/Plain/Electra_PreTrained.py --do_t
 --gen_model_name_or_path /project/6033386/partha9/model_cache/roberta_model \
 --dis_model_name_or_path /project/6033386/partha9/model_cache/roberta_config \
 --tokenizer_name /project/6033386/partha9/model_cache/roberta_tokenizer \
---fp16 \
 --output_dir /project/def-m2nagapp/partha9/Aster/Plain_Roberta_Electra/

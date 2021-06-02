@@ -409,16 +409,12 @@ if __name__ == "__main__":
     optimizer_last = os.path.join(checkpoint_last, 'optimizer.pt')
     if os.path.exists(optimizer_last):
         optimizer.load_state_dict(torch.load(optimizer_last))
-    logger.info("Before")
-    torch.save(generator,"test.pt")
     if args.fp16:
         try:
             from apex import amp
         except ImportError:
             raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
         model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
-    torch.save(generator, "test.pt")
-    logger.info("After")
     if args.n_gpu > 1:
         model = torch.nn.DataParallel(model)
 
