@@ -25,6 +25,7 @@ from tqdm import tqdm
 from Reformer import ElectraUtil
 import sys
 import argparse
+import uuid
 
 
 def freeze_model(model, model_name):
@@ -114,6 +115,41 @@ class ElectraClassification(nn.Module):
         return output
 
 
+def file_converter(file_path):
+    file = open(file_path, "r")
+    return zlib.compress(file.read().encode("utf-8")).hex()
+
+
+def get_embedding_dataset(file_path):
+    df = pd.read_csv(file_path + "Data/Java_Unified_Data.csv")
+    df['before_fix_uuid_file_path'] = df['before_fix_uuid_file_path'].map(lambda x: file_path + x)
+    df['before_fix_uuid_file_path'] = df['before_fix_uuid_file_path'].map(lambda x: file_converter(x))
+    column_names = ['id', 'report', 'before_fix_uuid_file_path']
+    accumulate_df = pd.DataFrame(columns=column_names)
+    for row in df.sample(frac=340 / len(df), random_state=13).reset_index(drop=True).iterrows():
+        negative_sample = df[(df['id'] != row[1]['id']) & (df['title'] != row[1]['title']) & (
+                df['github_repository'] == row[1]['github_repository'])].sample(frac=1, random_state=13).head(14)
+        negative_sample['report'] = negative_sample['title'] + " " + negative_sample['description']
+        drop_columns = set(negative_sample.columns.tolist()) - set(column_names)
+
+        positive_sample = row[1].to_dict()
+        positive_sample['report'] = positive_sample['title'] + " " + positive_sample['description']
+        positive_sample = {key: value for key, value in positive_sample.items() if key in column_names}
+        positive_sample['id'] = str(uuid.uuid4())
+        positive_sample['match'] = 1
+
+        negative_sample.drop(columns=drop_columns, inplace=True)
+        negative_sample['id'] = positive_sample['id']
+        negative_sample['match'] = 0
+
+        accumulate_df = accumulate_df.append(positive_sample, ignore_index=True)
+        accumulate_df = accumulate_df.append(negative_sample, ignore_index=True)
+
+    accumulate_df.reset_index(drop=True, inplace=True)
+    accumulate_df.rename(columns={'id': 'cid', 'before_fix_uuid_file_path': 'file_content'}, inplace=True)
+    return accumulate_df
+
+
 class BugDataset(Dataset):
 
     def __init__(self, project_name, dataframe, scratch_path=None):
@@ -201,6 +237,8 @@ if __name__ == "__main__":
     parser.add_argument("--token_max_size", default=None, type=int, help="")
     parser.add_argument("--batch_size", default=None, type=int, help="")
     parser.add_argument("--model_name", default=None, type=str, help="")
+    parser.add_argument('--combined_data', action='store_true', help="")
+    parser.add_argument('--embedding_data', action='store_true', help="")
     args = parser.parse_args()
     Path(args.root_path).mkdir(parents=True, exist_ok=True)
     # root_path = "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension_Classifier_Benchmark"
@@ -211,21 +249,22 @@ if __name__ == "__main__":
     # token_max_size = 1498
     # batch_size = 64
     # model_name = "roberta"
-
+    file_path = "/scratch/partha9/"
     dev = "cuda:0" if torch.cuda.is_available() else "cpu"
     tokenizer = RobertaTokenizer(args.tokenizer_root + "/tokenizer/aster-vocab.json",
                                  args.tokenizer_root + "/tokenizer/aster-merges.txt")
 
-    df1, df2, df3, df4, df5, df6 = get_combined_full_dataset(
-        "/project/def-m2nagapp/partha9/Dataset/Birt"), get_combined_full_dataset(
-        "/project/def-m2nagapp/partha9/Dataset/AspectJ"), get_combined_full_dataset(
-        "/project/def-m2nagapp/partha9/Dataset/Tomcat"), get_combined_full_dataset(
-        "/project/def-m2nagapp/partha9/Dataset/SWT"), get_combined_full_dataset(
-        "/project/def-m2nagapp/partha9/Dataset/JDT"), get_combined_full_dataset(
-        "/project/def-m2nagapp/partha9/Dataset/Eclipse_Platform_UI")
-
-    combined_df = create_random_dataset([df1, df2, df3, df4, df5, df6], full_size=5000)
-
+    if args.combined_data:
+        df1, df2, df3, df4, df5, df6 = get_combined_full_dataset(
+            "/project/def-m2nagapp/partha9/Dataset/Birt"), get_combined_full_dataset(
+            "/project/def-m2nagapp/partha9/Dataset/AspectJ"), get_combined_full_dataset(
+            "/project/def-m2nagapp/partha9/Dataset/Tomcat"), get_combined_full_dataset(
+            "/project/def-m2nagapp/partha9/Dataset/SWT"), get_combined_full_dataset(
+            "/project/def-m2nagapp/partha9/Dataset/JDT"), get_combined_full_dataset(
+            "/project/def-m2nagapp/partha9/Dataset/Eclipse_Platform_UI")
+        combined_df = create_random_dataset([df1, df2, df3, df4, df5, df6], full_size=5000)
+    elif args.embedding_data:
+        combined_df = get_embedding_dataset(file_path=file_path)
     dataset = BugDataset(project_name=args.project_name, scratch_path=args.scratch_path, dataframe=combined_df)
     config = AutoConfig.from_pretrained(args.model_path,
                                         num_labels=1)  # RobertaConfig.from_pretrained(model_path, num_labels=1)
