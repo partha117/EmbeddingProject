@@ -22,8 +22,9 @@ from datetime import datetime
 import gc
 from tqdm.notebook import tqdm as ntqdm
 from tqdm import tqdm
-from Reformer import ElectraUtil
 import sys
+sys.path.append(os.path.abspath(os.path.join('.', 'EmbeddingProject')))
+from Reformer import ElectraUtil
 import argparse
 import uuid
 
