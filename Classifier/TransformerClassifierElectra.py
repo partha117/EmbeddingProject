@@ -23,7 +23,7 @@ import gc
 from tqdm.notebook import tqdm as ntqdm
 from tqdm import tqdm
 import sys
-sys.path.append("/home/partha9/EmbeddingProject")
+sys.path.append(os.path.abspath("/home/partha9/EmbeddingProject"))
 from Reformer import ElectraUtil
 import argparse
 import uuid
