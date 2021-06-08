@@ -30,7 +30,7 @@ import uuid
 
 
 def freeze_model(model, model_name):
-    for param in getattr(model, model_name).parameters():
+    for param in getattr(model, model_name).parameters() if model_name else model.parameters():
         param.requires_grad = False
     return model
 
