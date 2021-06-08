@@ -104,6 +104,7 @@ class ClassificationHead(nn.Module):
 class ElectraClassification(nn.Module):
 
     def __init__(self, num_labels, base_model, config, kernel_num=3, kernel_sizes=[2, 3, 4, 5]):
+        super(ElectraClassification, self).__init__()
         self.num_labels = num_labels
         self.config = config
         self.transformer = base_model
