@@ -268,8 +268,8 @@ if __name__ == "__main__":
     elif args.embedding_data:
         combined_df = get_embedding_dataset(file_path=file_path)
     dataset = BugDataset(project_name=args.project_name, scratch_path=args.scratch_path, dataframe=combined_df)
-    config = AutoConfig.from_pretrained(args.model_path,
-                                        num_labels=1)  # RobertaConfig.from_pretrained(model_path, num_labels=1)
+    # config = AutoConfig.from_pretrained(args.model_path,
+    #                                     num_labels=1)  # RobertaConfig.from_pretrained(model_path, num_labels=1)
     full_base_model = torch.load(args.model_path)
     model = freeze_model(full_base_model.electra, args.model_name)
     model = ElectraClassification(num_labels=1, base_model=model,
