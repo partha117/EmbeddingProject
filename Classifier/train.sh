@@ -16,4 +16,5 @@ export CUDA_LAUNCH_BLOCKING=1; python /home/partha9/EmbeddingProject/Classifier/
 --tokenizer_root /project/def-m2nagapp/partha9/Aster/Reformer_Electra/ \
 --token_max_size 2048 \
 --batch_size 64 \
---model_name reformer
+--model_name reformer \
+--embedding
