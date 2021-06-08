@@ -270,7 +270,7 @@ if __name__ == "__main__":
     dataset = BugDataset(project_name=args.project_name, scratch_path=args.scratch_path, dataframe=combined_df)
     # config = AutoConfig.from_pretrained(args.model_path,
     #                                     num_labels=1)  # RobertaConfig.from_pretrained(model_path, num_labels=1)
-    full_base_model = torch.load(args.model_path)
+    full_base_model = torch.load(args.model_path + "/" + "discriminator")
     model = freeze_model(full_base_model.electra, args.model_name)
     model = ElectraClassification(num_labels=1, base_model=model,
                                   config=full_base_model.electra.config, kernel_num=3, kernel_sizes=[2, 3, 4, 5])
