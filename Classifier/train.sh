@@ -11,6 +11,7 @@
 export CUDA_LAUNCH_BLOCKING=1; python /home/partha9/EmbeddingProject/Classifier/TransformerClassifierElectra.py \
 --root_path /project/def-m2nagapp/partha9/Aster/ClassifierReformer \
 --model_path /project/def-m2nagapp/partha9/Aster/Reformer_Electra/ \
+--checkpoint checkpoint-1/discriminator \
 --project_name /project/def-m2nagapp/partha9/Dataset/CombinedData/ \
 --scratch_path /scratch/partha9/Dataset/ \
 --tokenizer_root /project/def-m2nagapp/partha9/Aster/Reformer_Electra/ \

@@ -234,6 +234,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_path", default=None, type=str, help="")
     parser.add_argument("--project_name", default=None, type=str, help="")
     parser.add_argument("--scratch_path", default=None, type=str, help="")
+    parser.add_argument("--checkpoint", default=None, type=str, help="")
     parser.add_argument("--tokenizer_root", default=None, type=str, help="")
     parser.add_argument("--token_max_size", default=None, type=int, help="")
     parser.add_argument("--batch_size", default=None, type=int, help="")
@@ -270,7 +271,7 @@ if __name__ == "__main__":
     dataset = BugDataset(project_name=args.project_name, scratch_path=args.scratch_path, dataframe=combined_df)
     # config = AutoConfig.from_pretrained(args.model_path,
     #                                     num_labels=1)  # RobertaConfig.from_pretrained(model_path, num_labels=1)
-    full_base_model = torch.load(args.model_path + "discriminator")
+    full_base_model = torch.load(args.model_path + args.checkpoint)
     model = freeze_model(full_base_model.electra, args.model_name)
     model = ElectraClassification(num_labels=1, base_model=model,
                                   config=full_base_model.electra.config, kernel_num=3, kernel_sizes=[2, 3, 4, 5])
