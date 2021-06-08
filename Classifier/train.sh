@@ -8,7 +8,7 @@
 #SBATCH --output=%x-%j.out
 #SBATCH --mail-user=p9chakra@uwtaerloo.ca
 #SBATCH --mail-type=ALL
-export CUDA_LAUNCH_BLOCKING=1; python /home/partha9/EmbeddingProject/Classifier/TransformerClassifierElectra.py --do_train \
+export CUDA_LAUNCH_BLOCKING=1; python /home/partha9/EmbeddingProject/Classifier/TransformerClassifierElectra.py \
 --root_path /project/def-m2nagapp/partha9/Aster/ClassifierReformer \
 --model_path /project/def-m2nagapp/partha9/Aster/Reformer_Electra/ \
 --project_name /project/def-m2nagapp/partha9/Dataset/CombinedData/ \

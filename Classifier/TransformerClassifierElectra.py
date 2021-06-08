@@ -241,6 +241,7 @@ if __name__ == "__main__":
     parser.add_argument('--combined_data', action='store_true', help="")
     parser.add_argument('--embedding_data', action='store_true', help="")
     args = parser.parse_args()
+    print(args)
     Path(args.root_path).mkdir(parents=True, exist_ok=True)
     # root_path = "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension_Classifier_Benchmark"
     # model_path = "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension/train_output/checkpoint-27500/"
