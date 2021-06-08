@@ -283,7 +283,7 @@ if __name__ == "__main__":
                                                                      args.project_name.split("/")[-1]),
         "wb"))
 
-    JAVA_LANGUAGE = Language('build/my-languages.so', 'java')
+    JAVA_LANGUAGE = Language('/project/def-m2nagapp/partha9/Data/build/my-languages.so', 'java')
     parser = Parser()
     parser.set_language(JAVA_LANGUAGE)
 
