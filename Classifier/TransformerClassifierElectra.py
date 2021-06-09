@@ -215,6 +215,9 @@ def get_label_weight(all_labels):
     unique_labels, label_count = np.unique(all_labels, return_counts=True)
     total_count = np.sum(label_count)
     label_weight = total_count / label_count
+    print(unique_labels)
+    print(label_weight)
+    print(all_labels)
     return [label_weight[item] for item in all_labels]
 
 
