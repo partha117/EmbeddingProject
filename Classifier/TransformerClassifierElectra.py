@@ -196,9 +196,10 @@ class BugDataset(Dataset):
         reportfile = open(self.tmp + str(features[self.map['cid']]) + "_report.txt", "r")
         reportfile_content = reportfile.read()
         code_data = zlib.decompress(bytes.fromhex(codefile_content)).decode()
-        # combined_data = reportfile_content + code_tree
+        code_ast_tree = parser.parse(bytes(code_data, 'utf-8')).root_node.sexp()
+        combined_data = reportfile_content + code_ast_tree
         # return features[self.map['cid']], self.tokenizer.encode_plus(combined_data,truncation=True, max_length=self.max_size)['input_ids'], features[self.map['match']]
-        return features[self.map['cid']], reportfile_content, code_data, features[self.map['match']]
+        return features[self.map['cid']], combined_data, features[self.map['match']]
 
 
 def batch_parser(content_list, report_list=None):
@@ -215,9 +216,6 @@ def get_label_weight(all_labels):
     unique_labels, label_count = np.unique(all_labels, return_counts=True)
     total_count = np.sum(label_count)
     label_weight = total_count / label_count
-    print(unique_labels)
-    print(label_weight)
-    print(all_labels)
     return [label_weight[int(item)] for item in all_labels]
 
 
@@ -311,11 +309,11 @@ if __name__ == "__main__":
         for i, data in enumerate(loop):
             # print("Here1")
             iter_start_time = datetime.now()
-            _, report, code, labels = data
-            print(code)
-            print(labels)
-            code_ast_tree = parser.parse(bytes(code, 'utf-8')).root_node.sexp()
-            combined_input = report + " " + code_ast_tree
+            _, combined_input, labels = data
+            # print(code)
+            # print(labels)
+            # code_ast_tree = parser.parse(bytes(code, 'utf-8')).root_node.sexp()
+            # combined_input = report + " " + code_ast_tree
 
             combined_input, labels = \
                 tokenizer.batch_encode_plus(combined_input, truncation=True, max_length=args.token_max_size,
