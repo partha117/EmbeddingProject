@@ -294,7 +294,7 @@ if __name__ == "__main__":
     label_weight = get_label_weight(dataset.get_all_label())
     sampler = WeightedRandomSampler(label_weight, len(label_weight), replacement=True)
 
-    dataloader = DataLoader(dataset, batch_size=args.batch_size, pin_memory=True, num_workers=2, sampler=sampler,
+    dataloader = DataLoader(dataset, batch_size=int(args.batch_size), pin_memory=True, num_workers=2, sampler=sampler,
                             drop_last=True)
     criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
@@ -312,7 +312,7 @@ if __name__ == "__main__":
             # print("Here1")
             iter_start_time = datetime.now()
             _, report, code, labels = data
-
+            print(code)
             code_ast_tree = parser.parse(bytes(code, 'utf-8')).root_node.sexp()
             combined_input = report + " " + code_ast_tree
 
