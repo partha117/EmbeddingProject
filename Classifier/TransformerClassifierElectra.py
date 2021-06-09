@@ -218,7 +218,7 @@ def get_label_weight(all_labels):
     print(unique_labels)
     print(label_weight)
     print(all_labels)
-    return [label_weight[item] for item in all_labels]
+    return [label_weight[int(item)] for item in all_labels]
 
 
 if __name__ == "__main__":
