@@ -112,7 +112,7 @@ class ElectraClassification(nn.Module):
                                              kernel_sizes=kernel_sizes, num_labels=num_labels)
 
     def forward(self, input_ids):
-        output = self.base_model(input_ids)
+        output = self.transformer(input_ids)
         output = self.classifier(output[0])
         return output
 
