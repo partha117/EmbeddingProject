@@ -313,6 +313,7 @@ if __name__ == "__main__":
             iter_start_time = datetime.now()
             _, report, code, labels = data
             print(code)
+            print(labels)
             code_ast_tree = parser.parse(bytes(code, 'utf-8')).root_node.sexp()
             combined_input = report + " " + code_ast_tree
 
