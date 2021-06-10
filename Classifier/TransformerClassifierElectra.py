@@ -94,6 +94,16 @@ class ClassificationHead(nn.Module):
     def forward(self, hidden_states, **kwargs):
         output = hidden_states.unsqueeze(1)
         print(output.shape)
+        print("----------------")
+        print(self.conv_layers[0](output).shape)
+        print(self.conv_layers[1](output).shape)
+        print(self.conv_layers[2](output).shape)
+        print(self.conv_layers[3](output).shape)
+        print(self.conv_layers[0](output).squeeze(3).shape)
+        print(self.conv_layers[1](output).squeeze(3).shape)
+        print(self.conv_layers[2](output).squeeze(3).shape)
+        print(self.conv_layers[3](output).squeeze(3).shape)
+        print("_---------------------")
         output = [nn.functional.relu(conv(output)).squeeze(3) for conv in self.conv_layers]
         print(output[0].shape)
         output = [nn.functional.max_pool1d(i, i.size(2)).squeeze(2) for i in output]
