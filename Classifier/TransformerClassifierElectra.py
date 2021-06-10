@@ -95,7 +95,6 @@ class ClassificationHead(nn.Module):
     def forward(self, hidden_states, **kwargs):
         output = hidden_states.unsqueeze(1)
         output = [nn.functional.relu(conv(output)).squeeze(3) for conv in self.conv_layers]
-        print(output[0].shape)
         output = [nn.functional.max_pool1d(i, i.size(2)).squeeze(2) for i in output]
         output = torch.cat(output, 1)
         output = self.dropout(output)
@@ -327,10 +326,8 @@ if __name__ == "__main__":
             # zero the parameter gradients
             optimizer.zero_grad()
             outputs = model(input_ids=combined_input.to(dev))
-            print(outputs)
-            print(outputs.shape)
-            print(torch.sigmoid(outputs))
-            loss = criterion(torch.sigmoid(outputs.logits.view(-1).double()).to(dev), labels.double().to(dev))
+            print(outputs.shape, labels.shape)
+            loss = criterion(torch.sigmoid(outputs.view(-1).double()).to(dev), labels.double().to(dev))
             loss_list.append(loss.item())
             epoch_loss.append(loss)
             loss.backward()
