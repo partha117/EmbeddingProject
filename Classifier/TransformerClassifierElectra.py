@@ -1,3 +1,4 @@
+import transformers
 from tree_sitter import Language, Parser
 from pathlib import Path
 from tokenizers import ByteLevelBPETokenizer
@@ -120,7 +121,7 @@ class ElectraClassification(nn.Module):
         self.num_labels = num_labels
         self.config = config
         self.transformer = base_model
-        self.classifier = ClassificationHead(config=config, embed_dim=config.hidden_size, kernel_num=kernel_num,
+        self.classifier = ClassificationHead(config=config, embed_dim=config.max_position_embeddings if isinstance(base_model, transformers.ReformerModel) else config.hidden_size, kernel_num=kernel_num,
                                              kernel_sizes=kernel_sizes, num_labels=num_labels)
 
     def forward(self, input_ids):
