@@ -93,7 +93,9 @@ class ClassificationHead(nn.Module):
 
     def forward(self, hidden_states, **kwargs):
         output = hidden_states.unsqueeze(1)
+        print(output.shape)
         output = [nn.functional.relu(conv(output)).squeeze(3) for conv in self.conv_layers]
+        print(output.shape)
         output = [nn.functional.max_pool1d(i, i.size(2)).squeeze(2) for i in output]
         output = torch.cat(output, 1)
         output = self.dropout(output)
