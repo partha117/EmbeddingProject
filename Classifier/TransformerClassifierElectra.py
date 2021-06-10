@@ -278,6 +278,7 @@ if __name__ == "__main__":
     model = ElectraClassification(num_labels=1, base_model=model,
                                   config=full_base_model.electra.config, kernel_num=3, kernel_sizes=[2, 3, 4, 5])
 
+    model.to(dev)
     Path(args.root_path + "_Dataset/{}/".format(args.project_name.split("/")[-1])).mkdir(parents=True, exist_ok=True)
     pickle.dump(dataset, open(
         args.root_path + "_Dataset/{}/{}_full_dataset.pickle".format(args.project_name.split("/")[-1],
