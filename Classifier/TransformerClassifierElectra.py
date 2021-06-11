@@ -300,7 +300,7 @@ if __name__ == "__main__":
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     loss_list = []
 
-    Path(args.root_path + "_Model").mkdir(parents=True, exist_ok=True)
+    Path(args.root_path + "_Electra_Model").mkdir(parents=True, exist_ok=True)
     print("Starting Epoch")
     for epoch in range(1, 7):  # loop over the dataset multiple times
 
