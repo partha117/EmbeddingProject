@@ -247,8 +247,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args.root_path += "_" + "embedding" if args.embedding_data else "benchmark"
     Path(args.root_path).mkdir(parents=True, exist_ok=True)
-    print(args.project_name.split("/")[-1], args.project_name)
-    exit(0)
     # root_path = "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension_Classifier_Benchmark"
     # model_path = "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension/train_output/checkpoint-27500/"
     # project_name = "/project/def-m2nagapp/partha9/Dataset/CombinedData/"
@@ -282,10 +280,10 @@ if __name__ == "__main__":
                                   config=full_base_model.electra.config, kernel_num=3, kernel_sizes=[2, 3, 4, 5])
 
     model.to(dev)
-    Path(args.root_path + "_Dataset/{}/".format(args.project_name.split("/")[-1])).mkdir(parents=True, exist_ok=True)
+    Path(args.root_path + "_Dataset/{}/".format(args.project_name.split("/")[-2])).mkdir(parents=True, exist_ok=True)
     pickle.dump(dataset, open(
-        args.root_path + "_Dataset/{}/{}_full_dataset.pickle".format(args.project_name.split("/")[-1],
-                                                                     args.project_name.split("/")[-1]),
+        args.root_path + "_Dataset/{}/{}_full_dataset.pickle".format(args.project_name.split("/")[-2],
+                                                                     args.project_name.split("/")[-2]),
         "wb"))
 
     JAVA_LANGUAGE = Language('/project/def-m2nagapp/partha9/Data/build/my-languages.so', 'java')
@@ -337,7 +335,7 @@ if __name__ == "__main__":
             # print("Here4")
             loop.set_description('Epoch {}'.format(epoch))
             loop.set_postfix(loss=round(loss.item(), 4), duration=(datetime.now() - iter_start_time).seconds)
-        torch.save(model, args.root_path + "_Model/Model_{}".format(epoch + 1))
+        torch.save(model, args.root_path + "_Electra_Model/Model_{}".format(epoch + 1))
         print("------------------------{} Epoch Completed----------------".format(epoch))
         epoch_loss = sum(epoch_loss) / len(epoch_loss)
         print("--------------Epoch Loss {} Time Elpased: {}---------------".format(epoch_loss, (
