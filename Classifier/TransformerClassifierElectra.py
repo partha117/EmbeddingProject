@@ -247,6 +247,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args.root_path += "_" + "embedding" if args.embedding_data else "benchmark"
     Path(args.root_path).mkdir(parents=True, exist_ok=True)
+    print(args.project_name.split("/")[-1], args.project_name)
+    exit(0)
     # root_path = "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension_Classifier_Benchmark"
     # model_path = "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension/train_output/checkpoint-27500/"
     # project_name = "/project/def-m2nagapp/partha9/Dataset/CombinedData/"
@@ -302,7 +304,7 @@ if __name__ == "__main__":
 
     Path(args.root_path + "_Model").mkdir(parents=True, exist_ok=True)
     print("Starting Epoch")
-    for epoch in range(1, 5):  # loop over the dataset multiple times
+    for epoch in range(1, 7):  # loop over the dataset multiple times
 
         epoch_loss = []
         epoch_start_time = datetime.now()
@@ -326,7 +328,6 @@ if __name__ == "__main__":
             # zero the parameter gradients
             optimizer.zero_grad()
             outputs = model(input_ids=combined_input.to(dev))
-            print(outputs.shape, labels.shape)
             loss = criterion(torch.sigmoid(outputs.view(-1).double()).to(dev), labels.double().to(dev))
             loss_list.append(loss.item())
             epoch_loss.append(loss)
@@ -337,7 +338,7 @@ if __name__ == "__main__":
             loop.set_description('Epoch {}'.format(epoch))
             loop.set_postfix(loss=round(loss.item(), 4), duration=(datetime.now() - iter_start_time).seconds)
         torch.save(model, args.root_path + "_Model/Model_{}".format(epoch + 1))
-        print("------------------------{} Epoch Completed----------------".format(epoch + 1))
+        print("------------------------{} Epoch Completed----------------".format(epoch))
         epoch_loss = sum(epoch_loss) / len(epoch_loss)
         print("--------------Epoch Loss {} Time Elpased: {}---------------".format(epoch_loss, (
                 datetime.now() - epoch_start_time).seconds))
