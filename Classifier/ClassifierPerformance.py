@@ -144,7 +144,7 @@ if __name__ == "__main__":
     token_max_size = int(options.token_max_size)
     batch_size = int(options.batch_size)
     dev = "cuda:0" if torch.cuda.is_available() else "cpu"
-    #model = torch.load(model_path + "Model_{}".format(model_no))
+    model = torch.load(model_path + "Model_{}".format(model_no))
     tokenizer = RobertaTokenizer(tokenizer_path + "tokenizer/aster-vocab.json",
                                  tokenizer_path + "tokenizer/aster-merges.txt")
 
@@ -154,7 +154,6 @@ if __name__ == "__main__":
         print("Starting Project {}".format(project_name))
         test_dataset = pd.read_csv(test_data_path + "{}_test.csv".format(project_name))
         positive_test_data = get_positive_dataset(test_dataset)
-        exit(0)
         acc_dict, mean_reciprocal_rank, mean_average_precision, auc_score = calculate_metrices(test_dataset,
                                                                                                positive_test_data,
                                                                                                project_name, tokenizer,
