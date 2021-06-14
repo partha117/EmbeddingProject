@@ -65,10 +65,10 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
         y_true = np.array([])
         y_predicted = np.array([])
         for batch in test_dataloader:
-            _,  report_inputs, code_inputs, labels = batch
+            _,  combined_input, labels = batch
 
-            # code_ast_tree = parser.parse(bytes(code_inputs, 'utf-8')).root_node.sexp()
-            combined_input = batch_parser(code_inputs,report_inputs)
+            # # code_ast_tree = parser.parse(bytes(code_inputs, 'utf-8')).root_node.sexp()
+            # combined_input = batch_parser(code_inputs,report_inputs)
 
             combined_input, labels = \
                 tokenizer.batch_encode_plus(combined_input, truncation=True, max_length=token_max_size, padding=True,
