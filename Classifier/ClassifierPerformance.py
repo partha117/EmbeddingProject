@@ -4,7 +4,7 @@ from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 import zlib
 import os
 import sys
-from Classifier.TransformerClassifierElectra import ElectraClassification, ClassificationHead
+from Classifier.TransformerClassifierElectra import ElectraClassification, ClassificationHead, BugDataset, get_combined_full_dataset, batch_parser
 from pathlib import Path
 import numpy as np
 import pickle
@@ -15,9 +15,8 @@ from tqdm import tqdm
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel
-import configargparse
+import argparse
 from tree_sitter import Language, Parser
-from TransformerClassifierBenchmark import BugDataset, get_combined_full_dataset, batch_parser
 
 
 def get_positive_dataset(test_dataset):
@@ -123,15 +122,15 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
 
 
 if __name__ == "__main__":
-    p = configargparse.ArgParser()
-    p.add('--model_no', required=True, is_config_file=False, help='Model Number')
-    p.add('--scratch_path', required=False, default="/scratch/partha9/",is_config_file=False, help='Model Number')
-    p.add('--batch_size', required=False, default=64, is_config_file=False, help='Model Number')
-    p.add('--model_path', required=True, is_config_file=False, help='Model Number')
-    p.add('--tokenizer_path', required=True, is_config_file=False, help='Model Number')
-    p.add('--test_data_path', required=True, is_config_file=False, help='Model Number')
-    p.add('--token_max_size', required=True, is_config_file=False, help='Model Number')
-    options = p.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model_no', help='Model Number')
+    parser.add_argument('--scratch_path', help='Model Number')
+    parser.add_argument('--batch_size', help='Model Number')
+    parser.add_argument('--model_path', help='Model Number')
+    parser.add_argument('--tokenizer_path', help='Model Number')
+    parser.add_argument('--test_data_path', help='Model Number')
+    parser.add_argument('--token_max_size', help='Model Number')
+    options = parser.parse_args()
 
 
     model_no = int(options.model_no)
