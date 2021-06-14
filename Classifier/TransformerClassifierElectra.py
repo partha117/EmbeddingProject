@@ -155,7 +155,7 @@ def get_embedding_dataset(file_path):
 
 class BugDataset(Dataset):
 
-    def __init__(self, project_name, dataframe, scratch_path=None):
+    def __init__(self, project_name, dataframe, scratch_path=None, parser=None):
         self.tmp = scratch_path
         self.tmp += project_name.split("/")[-1] + "/"
         # JAVA_LANGUAGE = Language('build/my-languages.so', 'java')
@@ -177,6 +177,7 @@ class BugDataset(Dataset):
         self.dataset.drop(columns=['report', 'file_content'], inplace=True)
         self.map = {name: index for index, name in enumerate(self.dataset.columns.tolist())}
         self.dataset = self.dataset.to_numpy()
+        self.parser = parser
 
     def __len__(self):
         return len(self.dataset)
@@ -197,7 +198,7 @@ class BugDataset(Dataset):
         reportfile = open(self.tmp + str(features[self.map['cid']]) + "_report.txt", "r")
         reportfile_content = reportfile.read()
         code_data = zlib.decompress(bytes.fromhex(codefile_content)).decode()
-        code_ast_tree = parser.parse(bytes(code_data, 'utf-8')).root_node.sexp()
+        code_ast_tree = self.parser.parse(bytes(code_data, 'utf-8')).root_node.sexp()
         combined_data = reportfile_content + code_ast_tree
         # return features[self.map['cid']], self.tokenizer.encode_plus(combined_data,truncation=True, max_length=self.max_size)['input_ids'], features[self.map['match']]
         return features[self.map['cid']], combined_data, features[self.map['match']]
@@ -259,6 +260,9 @@ if __name__ == "__main__":
     dev = "cuda:0" if torch.cuda.is_available() else "cpu"
     tokenizer = RobertaTokenizer(args.tokenizer_root + "/tokenizer/aster-vocab.json",
                                  args.tokenizer_root + "/tokenizer/aster-merges.txt")
+    JAVA_LANGUAGE = Language('/project/def-m2nagapp/partha9/Data/build/my-languages.so', 'java')
+    parser = Parser()
+    parser.set_language(JAVA_LANGUAGE)
 
     if args.combined_data:
         df1, df2, df3, df4, df5, df6 = get_combined_full_dataset(
@@ -271,7 +275,7 @@ if __name__ == "__main__":
         combined_df = create_random_dataset([df1, df2, df3, df4, df5, df6], full_size=5000)
     elif args.embedding_data:
         combined_df = get_embedding_dataset(file_path=file_path)
-    dataset = BugDataset(project_name=args.project_name, scratch_path=args.scratch_path, dataframe=combined_df)
+    dataset = BugDataset(project_name=args.project_name, scratch_path=args.scratch_path, dataframe=combined_df,parser=parser)
     # config = AutoConfig.from_pretrained(args.model_path,
     #                                     num_labels=1)  # RobertaConfig.from_pretrained(model_path, num_labels=1)
     full_base_model = torch.load(args.model_path + args.checkpoint)
@@ -286,9 +290,7 @@ if __name__ == "__main__":
                                                                      args.project_name.split("/")[-2]),
         "wb"))
 
-    JAVA_LANGUAGE = Language('/project/def-m2nagapp/partha9/Data/build/my-languages.so', 'java')
-    parser = Parser()
-    parser.set_language(JAVA_LANGUAGE)
+
 
     unique_labels = np.unique(dataset.get_all_label())
     label_weight = get_label_weight(dataset.get_all_label())
