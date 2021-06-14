@@ -77,7 +77,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
             model.eval()
             with torch.no_grad():
                 eval_result = model(input_ids=combined_input.to(dev))
-                eval_result = torch.sigmoid(eval_result.logits.view(-1).double())
+                eval_result = torch.sigmoid(eval_result.view(-1).double())
             #print(eval_result)
             y_true = np.append(y_true, labels.cpu().numpy().ravel())
             y_predicted = np.append(y_predicted, eval_result.cpu().numpy().ravel())
