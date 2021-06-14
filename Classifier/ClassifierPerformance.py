@@ -46,7 +46,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
     global_y_true = np.array([])
     global_y_predicted = np.array([])
 
-    JAVA_LANGUAGE = Language('build/my-languages.so', 'java')
+    JAVA_LANGUAGE = Language('/home/partha9/build/my-languages.so', 'java')
     parser = Parser()
     parser.set_language(JAVA_LANGUAGE)
     positive_test_data = positive_test_data if len(positive_test_data) <= 100 else positive_test_data.sample(frac=100.0/len(positive_test_data),random_state=13)
