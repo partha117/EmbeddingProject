@@ -79,7 +79,7 @@ def convert_file_to_ast(file_path, parser):
 
 
 def save_file(path, item):
-    JAVA_LANGUAGE = Language('/project/def-m2nagapp/partha9/Data/build/my-languages.so', 'java')
+    JAVA_LANGUAGE = Language('/project/def-m2nagapp/partha9/build/my-languages.so', 'java')
     parser = Parser()
     parser.set_language(JAVA_LANGUAGE)
     before_fix_uuid_name = item[1]['before_fix_uuid_file_path'].split("/")[-1].split(".")[0]
@@ -157,7 +157,7 @@ class BugDataset(Dataset):
 
 if __name__ == "__main__":
     scratch_path = "/scratch/"
-    root_path = "/project/def-m2nagapp/partha9/Aster/COodeBERT_MLM/"
+    root_path = "/project/def-m2nagapp/partha9/Aster/CodeBERT_MLM/"
     Path(root_path).mkdir(parents=True, exist_ok=True)
     train_data, val_data = train_test_split(pd.read_csv(scratch_path + "partha9/Data/Java_Train_Data.csv"),
                                             test_size=0.125)
