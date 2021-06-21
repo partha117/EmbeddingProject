@@ -31,7 +31,7 @@ def build_lib():
 
 def create_java_only_dataset():
     if not os.path.isfile(scratch_path + "partha9/Data/Java_Unified_Data_with_SHA.csv"):
-        df = pd.read_csv("Data/Unified_Data_with_SHA.csv")
+        df = pd.read_csv(scratch_path + "partha9/Data/Unified_Data_with_SHA.csv")
         df2 = df[df["language_name"] == 'Java']
         df2.reset_index(drop=True, inplace=True)
         df2.to_csv("Data/Java_Unified_Data_with_SHA.csv", index=False)
@@ -194,7 +194,7 @@ if __name__ == "__main__":
         output_dir=root_path + "/train_output/",
         overwrite_output_dir=True,
         num_train_epochs=7,
-        per_device_train_batch_size=32,
+        per_device_train_batch_size=16,
         save_steps=500,
         save_total_limit=4,
         dataloader_drop_last=True
