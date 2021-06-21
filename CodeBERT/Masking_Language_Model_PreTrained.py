@@ -142,13 +142,12 @@ class BugDataset(Dataset):
             idx = idx.tolist()
         rows = self.dataset.iloc[idx, :]
         if isinstance(idx, int):
-            before_fix_ast_path = scratch_path + "partha9/Data/AST_Files/" + get_uuid(
-                rows['before_fix_uuid_file_path']) + ".txt"
+            before_fix_ast_path = scratch_path + "partha9/Data/UUID_Files/" + rows['before_fix_uuid_file_path']
             report_files = scratch_path + "partha9/Data/Report_Files/" + get_uuid(
                 rows['before_fix_uuid_file_path']) + ".txt"
         else:
             before_fix_ast_path = rows['before_fix_uuid_file_path'].map(
-                lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
+                lambda x: scratch_path + "partha9/Data/UUID_Files/" + x).tolist()
             report_files = rows['before_fix_uuid_file_path'].map(
                 lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
         temp = file_reader(before_fix_ast_path, report_files)
