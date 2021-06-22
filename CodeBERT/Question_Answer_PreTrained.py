@@ -12,7 +12,7 @@ from transformers import DataCollatorForLanguageModeling, RobertaConfig, Reforme
     XLMRobertaConfig
 from transformers import Trainer, TrainingArguments
 from transformers import AdamW, RobertaModel, AutoModel, RobertaTokenizer, AutoModelForMaskedLM, RobertaForMaskedLM, \
-    XLNetLMHeadModel, ReformerForMaskedLM, ReformerForQuestionAnswering
+    XLNetLMHeadModel, ReformerForMaskedLM, ReformerForQuestionAnswering, RobertaForQuestionAnswering
 from joblib import Parallel, delayed
 import json
 from tree_sitter import Language, Parser
@@ -162,25 +162,23 @@ class BugDataset(Dataset):
             idx = idx.tolist()
         rows = self.dataset.iloc[idx, :]
         if isinstance(idx, int):
-            before_fix_ast_path = scratch_path + "partha9/Data/AST_Files/" + get_uuid(
-                rows['before_fix_uuid_file_path']) + ".txt"
-            after_fix_ast_path = scratch_path + "partha9/Data/AST_Files/" + get_uuid(
-                rows['after_fix_uuid_file_path']) + ".txt"
+            before_fix_file_path = scratch_path + "partha9/Data/UUID_Files/" + rows['before_fix_uuid_file_path']
+            after_fix_file_path = scratch_path + "partha9/Data/UUID_Files/" + rows['after_fix_uuid_file_path']
             report_files = scratch_path + "partha9/Data/Report_Files/" + get_uuid(
                 rows['before_fix_uuid_file_path']) + ".txt"
         else:
-            before_fix_ast_path = rows['before_fix_uuid_file_path'].map(
-                lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
-            after_fix_ast_path = rows['after_fix_uuid_file_path'].map(
-                lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
+            before_fix_file_path = rows['before_fix_uuid_file_path'].map(
+                lambda x: scratch_path + "partha9/Data/UUID_Files/" + x).tolist()
+            after_fix_file_path = rows['after_fix_uuid_file_path'].map(
+                lambda x: scratch_path + "partha9/Data/UUID_Files/" + x).tolist()
             report_files = rows['before_fix_uuid_file_path'].map(
                 lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
-        temp = file_reader(before_fix_ast_path, after_fix_ast_path, report_files)
-        before, after = self.tokenizer.encode_plus(temp[1], truncation=True, max_length=2048)['input_ids'], \
-                        self.tokenizer.encode_plus(temp[2], truncation=True, max_length=2048)['input_ids']
+        temp = file_reader(before_fix_file_path, after_fix_file_path, report_files)
+        before, after = self.tokenizer.encode_plus(temp[1], truncation=True, max_length=512)['input_ids'], \
+                        self.tokenizer.encode_plus(temp[2], truncation=True, max_length=512)['input_ids']
         start, end = find_difference(before, after)
-        report_context = self.tokenizer.encode_plus(temp[0], temp[1], truncation=True, max_length=2048, padding=True,
-                                                    pad_to_multiple_of=2048)
+        report_context = self.tokenizer.encode_plus(temp[0], temp[1], truncation=True, max_length=512, padding=True,
+                                                    pad_to_multiple_of=512)
         return {'input_ids': torch.tensor(report_context['input_ids']),
                 'attention_mask': torch.tensor(report_context['attention_mask']), 'start_positions': start,
                 'end_positions': end}
@@ -189,7 +187,7 @@ class BugDataset(Dataset):
 if __name__ == "__main__":
     build_lib()
     scratch_path = "/scratch/"
-    root_path = "/project/def-m2nagapp/partha9/Aster/ReformerQA/"
+    root_path = "/project/def-m2nagapp/partha9/Aster/CodeBERT_QA/"
     Path(root_path).mkdir(parents=True, exist_ok=True)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     create_java_only_dataset()
@@ -197,13 +195,13 @@ if __name__ == "__main__":
     create_ast_files()
     train_data, val_data = train_test_split(pd.read_csv(scratch_path + "partha9/Data/Java_Train_Data.csv"),
                                             test_size=0.125)
-    before_fix_ast_paths = train_data['before_fix_uuid_file_path'].map(
-        lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
-    after_fix_ast_paths = train_data['after_fix_uuid_file_path'].map(
-        lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
+    before_fix_file_paths = train_data['before_fix_uuid_file_path'].map(
+        lambda x: scratch_path + "partha9/Data/UUID_Files/" + x).tolist()
+    after_fix_file_paths = train_data['after_fix_uuid_file_path'].map(
+        lambda x: scratch_path + "partha9/Data/UUID_Files/" + x).tolist()
     report_files = train_data['before_fix_uuid_file_path'].map(
         lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
-    all_file_path = before_fix_ast_paths + report_files
+    all_file_path = before_fix_file_paths + report_files
     if not os.path.isfile(root_path + "/tokenizer/aster-vocab.json"):
         tokenizer = ByteLevelBPETokenizer()
         tokenizer.train(files=all_file_path, min_frequency=2, special_tokens=[
@@ -218,11 +216,8 @@ if __name__ == "__main__":
     tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     save_at = 500
-    # ToDo: Load a MLM pre-trained model in that case config is not required
-    config = ReformerConfig.from_pretrained("/project/6033386/partha9/model_cache/reformer_config", axial_pos_shape=(32, 64),
-                                            vocab_size=tokenizer.vocab_size, max_position_embeddings=4096)
-    config.is_decoder = False
-    model = ReformerForQuestionAnswering(config=config)
+    model = RobertaForQuestionAnswering.from_pretrained(
+        "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst" + "/train_output/" + "checkpoint-18000/")
     train_dataset = BugDataset(dataframe=train_data, tokenizer=tokenizer)
     model.to(device)
     model.train()

@@ -142,15 +142,15 @@ class BugDataset(Dataset):
             idx = idx.tolist()
         rows = self.dataset.iloc[idx, :]
         if isinstance(idx, int):
-            before_fix_ast_path = scratch_path + "partha9/Data/UUID_Files/" + rows['before_fix_uuid_file_path']
+            before_fix_file_path = scratch_path + "partha9/Data/UUID_Files/" + rows['before_fix_uuid_file_path']
             report_files = scratch_path + "partha9/Data/Report_Files/" + get_uuid(
                 rows['before_fix_uuid_file_path']) + ".txt"
         else:
-            before_fix_ast_path = rows['before_fix_uuid_file_path'].map(
+            before_fix_file_path = rows['before_fix_uuid_file_path'].map(
                 lambda x: scratch_path + "partha9/Data/UUID_Files/" + x).tolist()
             report_files = rows['before_fix_uuid_file_path'].map(
                 lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
-        temp = file_reader(before_fix_ast_path, report_files)
+        temp = file_reader(before_fix_file_path, report_files)
         return self.tokenizer.encode_plus(temp, truncation=True, max_length=512)['input_ids']
 
 
@@ -163,14 +163,13 @@ if __name__ == "__main__":
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     create_java_only_dataset()
     create_report_files()
-    create_ast_files()
-    before_fix_ast_paths = train_data['before_fix_uuid_file_path'].map(
-        lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
-    after_fix_ast_paths = train_data['after_fix_uuid_file_path'].map(
-        lambda x: scratch_path + "partha9/Data/AST_Files/" + get_uuid(x) + ".txt").tolist()
+    before_fix_file_paths = train_data['before_fix_uuid_file_path'].map(
+        lambda x: scratch_path + "partha9/Data/UUID_Files/" + x).tolist()
+    after_fix_file_paths = train_data['after_fix_uuid_file_path'].map(
+        lambda x: scratch_path + "partha9/Data/UUID_Files/" + x).tolist()
     report_files = train_data['before_fix_uuid_file_path'].map(
         lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
-    all_file_path = before_fix_ast_paths + report_files
+    all_file_path = before_fix_file_paths + report_files
     if not os.path.isfile(root_path + "/tokenizer/aster-vocab.json"):
         tokenizer = ByteLevelBPETokenizer()
         tokenizer.train(files=all_file_path, min_frequency=2, special_tokens=[
