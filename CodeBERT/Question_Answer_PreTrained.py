@@ -192,7 +192,7 @@ if __name__ == "__main__":
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     create_java_only_dataset()
     create_report_files()
-    create_ast_files()
+    # create_ast_files()
     train_data, val_data = train_test_split(pd.read_csv(scratch_path + "partha9/Data/Java_Train_Data.csv"),
                                             test_size=0.125)
     before_fix_file_paths = train_data['before_fix_uuid_file_path'].map(
@@ -217,13 +217,13 @@ if __name__ == "__main__":
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     save_at = 500
     model = RobertaForQuestionAnswering.from_pretrained(
-        "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst" + "/train_output/" + "checkpoint-18000/")
+        "/project/def-m2nagapp/partha9/Aster/CodeBERT_MLM" + "/train_output/" + "checkpoint-1500/")
     train_dataset = BugDataset(dataframe=train_data, tokenizer=tokenizer)
     model.to(device)
     model.train()
     optim = AdamW(model.parameters(), lr=5e-5)
     train_loader = DataLoader(train_dataset, batch_size=6, shuffle=True)
-    for epoch in range(3):
+    for epoch in range(7):
         model.train()
         loop = tqdm(train_loader, leave=True)
         for i, batch in enumerate(loop):
