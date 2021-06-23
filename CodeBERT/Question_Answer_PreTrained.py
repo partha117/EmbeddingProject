@@ -190,11 +190,14 @@ if __name__ == "__main__":
     root_path = "/project/def-m2nagapp/partha9/Aster/CodeBERT_QA/"
     Path(root_path).mkdir(parents=True, exist_ok=True)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    print("Starting Java Only dataset")
     create_java_only_dataset()
+    print("Starting report files")
     create_report_files()
     # create_ast_files()
     train_data, val_data = train_test_split(pd.read_csv(scratch_path + "partha9/Data/Java_Train_Data.csv"),
                                             test_size=0.125)
+    print("Starting path collection")
     before_fix_file_paths = train_data['before_fix_uuid_file_path'].map(
         lambda x: scratch_path + "partha9/Data/UUID_Files/" + x.split("/")[-1]).tolist()
     after_fix_file_paths = train_data['after_fix_uuid_file_path'].map(
@@ -224,6 +227,7 @@ if __name__ == "__main__":
     model.train()
     optim = AdamW(model.parameters(), lr=5e-5)
     train_loader = DataLoader(train_dataset, batch_size=6, shuffle=True)
+    print("Staring train")
     for epoch in range(7):
         model.train()
         loop = tqdm(train_loader, leave=True)
