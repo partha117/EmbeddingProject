@@ -203,6 +203,7 @@ if __name__ == "__main__":
         lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
     all_file_path = before_fix_file_paths + report_files
     if not os.path.isfile(root_path + "/tokenizer/aster-vocab.json"):
+        print("starting tokenizer train")
         tokenizer = ByteLevelBPETokenizer()
         tokenizer.train(files=all_file_path, min_frequency=2, special_tokens=[
             "<s>",
