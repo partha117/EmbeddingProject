@@ -142,7 +142,7 @@ class BugDataset(Dataset):
             idx = idx.tolist()
         rows = self.dataset.iloc[idx, :]
         if isinstance(idx, int):
-            before_fix_file_path = scratch_path + "partha9/Data/UUID_Files/" + rows['before_fix_uuid_file_path']
+            before_fix_file_path = scratch_path + "partha9/Data/UUID_Files/" + rows['before_fix_uuid_file_path'].split("/")[-1]
             report_files = scratch_path + "partha9/Data/Report_Files/" + get_uuid(
                 rows['before_fix_uuid_file_path']) + ".txt"
         else:
@@ -164,9 +164,9 @@ if __name__ == "__main__":
     create_java_only_dataset()
     create_report_files()
     before_fix_file_paths = train_data['before_fix_uuid_file_path'].map(
-        lambda x: scratch_path + "partha9/Data/UUID_Files/" + x).tolist()
+        lambda x: scratch_path + "partha9/Data/UUID_Files/" + x.split("/")[-1]).tolist()
     after_fix_file_paths = train_data['after_fix_uuid_file_path'].map(
-        lambda x: scratch_path + "partha9/Data/UUID_Files/" + x).tolist()
+        lambda x: scratch_path + "partha9/Data/UUID_Files/" + x.split("/")[-1]).tolist()
     report_files = train_data['before_fix_uuid_file_path'].map(
         lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
     all_file_path = before_fix_file_paths + report_files
