@@ -113,10 +113,12 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
     auc_score = roc_auc_score(global_y_true, global_y_predicted)
 
     # calculation of mrr
+    print("Mrr", mrr_value)
     mean_reciprocal_rank = np.mean(mrr_value)
 
     # calculation of top k
     acc_dict = {}
+    print("Top K", top_k_counter)
     for i, counter in enumerate(top_k_counter):
         acc = counter / (len(positive_test_data))
         acc_dict[i + 1] = round(acc, 3)
