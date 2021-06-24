@@ -58,6 +58,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
         #ToDo: Verify K
         test_dataset = get_sample_set(idx=i, positive_test_data=positive_test_data,
                                       combined_full_dataset=combined_full_dataset, k=10)
+        print(len(test_dataset))
         test_bugdataset = BugDataset(project_name=project_name, dataframe=test_dataset, scratch_path=scratch_path, parser=parser)
         test_dataloader = DataLoader(test_bugdataset, batch_size=30, pin_memory=True, num_workers=1)
         # data = next(iter(test_dataloader))
@@ -84,6 +85,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
 
         # mrr calculation
         sorted_prediction_rank = np.argsort(-y_predicted)
+        print("y_predict", y_predicted)
         sorted_prediction_value = np.array([y_true[item] for item in sorted_prediction_rank])
         print(sorted_prediction_value)
         lowest_retrieval_rank = (sorted_prediction_value == 0).argsort(axis=0)
