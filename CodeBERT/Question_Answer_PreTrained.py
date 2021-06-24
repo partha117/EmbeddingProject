@@ -185,6 +185,7 @@ class BugDataset(Dataset):
 
 
 if __name__ == "__main__":
+    print("Building lib")
     build_lib()
     scratch_path = "/scratch/"
     root_path = "/project/def-m2nagapp/partha9/Aster/CodeBERT_QA/"

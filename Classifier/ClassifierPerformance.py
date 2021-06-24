@@ -54,7 +54,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
 
     loop_tqdm = tqdm(range(len(positive_test_data)), leave=True)
     for i in loop_tqdm:
-        # print((i / len(positive_test_data)) * 100)
+        print((i / len(positive_test_data)) * 100)
         #ToDo: Verify K
         test_dataset = get_sample_set(idx=i, positive_test_data=positive_test_data,
                                       combined_full_dataset=combined_full_dataset, k=10)
@@ -85,9 +85,9 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
         # mrr calculation
         sorted_prediction_rank = np.argsort(-y_predicted)
         sorted_prediction_value = np.array([y_true[item] for item in sorted_prediction_rank])
-        # print(sorted_prediction_value)
+        print(sorted_prediction_value)
         lowest_retrieval_rank = (sorted_prediction_value == 0).argsort(axis=0)
-        # print(lowest_retrieval_rank, lowest_retrieval_rank[0])
+        print(lowest_retrieval_rank, lowest_retrieval_rank[0])
         mrr_value = np.append(mrr_value, np.array(1.0 / (lowest_retrieval_rank[0] + 1)))
 
         # average precision calculation
