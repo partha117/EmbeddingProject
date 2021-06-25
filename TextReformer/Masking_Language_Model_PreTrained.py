@@ -202,7 +202,7 @@ if __name__ == "__main__":
         save_total_limit=4,
         dataloader_drop_last=True
     )
-    config = ReformerConfig.from_pretrained("/project/6033386/partha9/model_cache/reformer_config", axial_pos_shape=(32, 64),
+    config = ReformerConfig.from_pretrained("/project/6033386/partha9/model_cache/reformer_2048_config", axial_pos_shape=(32, 64),
                                             vocab_size=tokenizer.vocab_size, max_position_embeddings=4096) # ReformerConfig.from_pretrained("google/reformer-enwik8")
     config.is_decoder = False
     model = ReformerForMaskedLM(
