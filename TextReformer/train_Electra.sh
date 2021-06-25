@@ -12,7 +12,7 @@ export CUDA_LAUNCH_BLOCKING=1; python /home/partha9/EmbeddingProject/TextReforme
 --do_eval \
 --train_file train_data.csv \
 --dev_file test_data.csv \
---max_seq_length 4094 \
+--max_seq_length 2048 \
 --per_gpu_train_batch_size 8 \
 --per_gpu_eval_batch_size 8 \
 --learning_rate 1e-5 \
