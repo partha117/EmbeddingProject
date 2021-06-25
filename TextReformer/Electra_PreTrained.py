@@ -271,7 +271,7 @@ if __name__ == "__main__":
     scratch_path = "/scratch/"
     if not is_cedar:
         scratch_path += "partha9/"
-    root_path = "/project/def-m2nagapp/partha9/Aster/Reformer_Electra/"
+    root_path = "/project/def-m2nagapp/partha9/Aster/Text_Reformer_Electra/"
     Path(root_path).mkdir(parents=True, exist_ok=True)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     create_java_only_dataset()
