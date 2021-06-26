@@ -220,7 +220,7 @@ if __name__ == "__main__":
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     save_at = 500
     model = RobertaForQuestionAnswering.from_pretrained(
-        "/project/def-m2nagapp/partha9/Aster/PlainRobertaWithAst_Size_Extension" + "/train_output/" + "checkpoint-18000/")
+        "/project/def-m2nagapp/partha9/Aster/Text_Extended_Roberta_MLM" + "/train_output/" + "checkpoint-25000/")
     train_dataset = BugDataset(dataframe=train_data, tokenizer=tokenizer)
     model.to(device)
     model.train()
