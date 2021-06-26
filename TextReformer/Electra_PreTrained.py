@@ -284,7 +284,6 @@ if __name__ == "__main__":
         lambda x: scratch_path + "Data/UUID_Files/" + x.split("/")[-1]).tolist()
     report_files = train_data['before_fix_uuid_file_path'].map(
         lambda x: scratch_path + "Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
-    print(before_fix_file_paths[0:100])
     all_file_path = before_fix_file_paths + report_files
     if not os.path.isfile(root_path + "/tokenizer/aster-vocab.json"):
         tokenizer = ByteLevelBPETokenizer()

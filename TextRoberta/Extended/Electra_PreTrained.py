@@ -276,7 +276,6 @@ if __name__ == "__main__":
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     create_java_only_dataset()
     create_report_files()
-    create_ast_files()
     train_data, val_data = train_test_split(pd.read_csv(scratch_path + "Data/Java_Train_Data.csv"),
                                             test_size=0.125)
     before_fix_file_paths = train_data['before_fix_uuid_file_path'].map(
@@ -341,6 +340,7 @@ if __name__ == "__main__":
     args.start_step = 0
     checkpoint_last = os.path.join(args.output_dir, latest_checkpoint) if latest_checkpoint is not None else os.path.join(args.output_dir, 'checkpoint-last')
     temp_config = AutoConfig.from_pretrained(args.dis_model_name_or_path)
+    temp_config.is_decoder = False
     if os.path.exists(checkpoint_last) and os.listdir(checkpoint_last):
         args.gen_model_name_or_path = os.path.join(checkpoint_last, 'generator')
         logger.info("Generator Last Checkpoint {}".format(args.gen_model_name_or_path))
