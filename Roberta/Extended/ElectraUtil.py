@@ -447,7 +447,7 @@ def train(args, train_dataset, eval_dataset, model, generator, discriminator, to
         disc_model_to_save = discriminator.module if hasattr(discriminator,
                                                              'module') else discriminator
         #gen_model_to_save.save_pretrained(generator_path)
-        torch.save(gen_model_to_save, generator_path)
+        torch.save(gen_model_to_save.state_dict(), generator_path)
         torch.save(disc_model_to_save,discriminator_path)
         #disc_model_to_save.electra.save_pretrained(discriminator_path)
         logger.info("Saving model checkpoint to %s", last_output_dir)
