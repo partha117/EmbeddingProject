@@ -199,8 +199,7 @@ class BugDataset(Dataset):
         reportfile = open(self.tmp + str(features[self.map['cid']]) + "_report.txt", "r")
         reportfile_content = reportfile.read()
         code_data = zlib.decompress(bytes.fromhex(codefile_content)).decode()
-        code_ast_tree = self.parser.parse(bytes(code_data, 'utf-8')).root_node.sexp()
-        combined_data = reportfile_content + code_ast_tree
+        combined_data = reportfile_content + " " + code_data
         # return features[self.map['cid']], self.tokenizer.encode_plus(combined_data,truncation=True, max_length=self.max_size)['input_ids'], features[self.map['match']]
         return features[self.map['cid']], combined_data, features[self.map['match']]
 
@@ -309,8 +308,9 @@ if __name__ == "__main__":
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     loss_list = []
 
-    Path(args.root_path + "_Electra_Model").mkdir(parents=True, exist_ok=True)
+    Path(args.root_path + "_Model").mkdir(parents=True, exist_ok=True)
     print("Starting Epoch")
+    exit(0)
     for epoch in range(1, 7):  # loop over the dataset multiple times
 
         epoch_loss = []
