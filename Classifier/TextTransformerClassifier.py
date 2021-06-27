@@ -125,6 +125,7 @@ def file_converter(file_path):
 
 
 def get_embedding_dataset(file_path):
+    print("collecting embedding data")
     df = pd.read_csv(file_path + "Data/Java_Unified_Data.csv")
     df['before_fix_uuid_file_path'] = df['before_fix_uuid_file_path'].map(lambda x: file_path + x)
     df['before_fix_uuid_file_path'] = df['before_fix_uuid_file_path'].map(lambda x: file_converter(x))
@@ -256,6 +257,7 @@ if __name__ == "__main__":
                                  args.tokenizer_root + "/tokenizer/aster-merges.txt")
 
     if args.combined_data:
+        print("collecting combined data")
         df1, df2, df3, df4, df5, df6 = get_combined_full_dataset(
             "/project/def-m2nagapp/partha9/Dataset/Birt"), get_combined_full_dataset(
             "/project/def-m2nagapp/partha9/Dataset/AspectJ"), get_combined_full_dataset(
@@ -269,7 +271,7 @@ if __name__ == "__main__":
     dataset = BugDataset(project_name=args.project_name, scratch_path=args.scratch_path, dataframe=combined_df,parser=parser)
     # config = AutoConfig.from_pretrained(args.model_path,
     #                                     num_labels=1)  # RobertaConfig.from_pretrained(model_path, num_labels=1)
-
+    print("Loading models")
     if args.electra:
         if args.state_dict:
             temp_config = AutoConfig.from_pretrained(args.dis_model_name_or_path)

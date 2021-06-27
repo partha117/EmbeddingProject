@@ -18,4 +18,5 @@ export CUDA_LAUNCH_BLOCKING=1; python /home/partha9/EmbeddingProject/Classifier/
 --token_max_size 2048 \
 --batch_size 64 \
 --model_name reformer \
---embedding
+--embedding_data \
+--electra
