@@ -274,7 +274,7 @@ if __name__ == "__main__":
     print("Loading models")
     if args.electra:
         if args.state_dict:
-            temp_config = AutoConfig.from_pretrained(args.dis_model_name_or_path)
+            temp_config = AutoConfig.from_pretrained(args.config)
             temp_config.is_decoder = False
             temp_config.output_hidden_states = True
             full_base_model_dict = torch.load(args.model_path + args.checkpoint)

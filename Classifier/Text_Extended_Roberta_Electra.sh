@@ -9,13 +9,16 @@
 #SBATCH --mail-user=p9chakra@uwtaerloo.ca
 #SBATCH --mail-type=ALL
 export CUDA_LAUNCH_BLOCKING=1; python /home/partha9/EmbeddingProject/Classifier/TextTransformerClassifier.py \
---root_path /project/def-m2nagapp/partha9/Aster/Classifier_Text_Reformer_Electra \
---model_path /project/def-m2nagapp/partha9/Aster/Text_Reformer_Electra/ \
+--root_path /project/def-m2nagapp/partha9/Aster/Classifier_Text_Extended_Roberta_Electra \
+--model_path /project/def-m2nagapp/partha9/Aster/Text_Extended_Roberta_Electra/ \
 --checkpoint checkpoint-3/discriminator \
 --project_name /project/def-m2nagapp/partha9/Dataset/CombinedData/ \
 --scratch_path /scratch/partha9/Dataset/ \
---tokenizer_root /project/def-m2nagapp/partha9/Aster/Text_Reformer_Electra/ \
---token_max_size 2048 \
---batch_size 16 \
+--tokenizer_root /project/def-m2nagapp/partha9/Aster/Text_Extended_Roberta_Electra/ \
+--token_max_size 1500 \
+--batch_size 32 \
+--model_name roberta \
+--config /project/6033386/partha9/model_cache/roberta_1500_config \
 --embedding_data \
+--state_dict \
 --electra
