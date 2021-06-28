@@ -283,7 +283,7 @@ if __name__ == "__main__":
             model = freeze_model(full_base_model.electra, args.model_name)
         else:
             full_base_model = torch.load(args.model_path + args.checkpoint)
-            model = freeze_model(full_base_model, args.model_name)
+            model = freeze_model(full_base_model.electra, args.model_name)
         model = ElectraClassification(num_labels=1, base_model=model,
                                   config=full_base_model.electra.config, kernel_num=3, kernel_sizes=[2, 3, 4, 5])
     else:
