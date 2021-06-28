@@ -312,8 +312,7 @@ if __name__ == "__main__":
 
     Path(args.root_path + "_Model").mkdir(parents=True, exist_ok=True)
     print("Starting Epoch")
-    exit(0)
-    for epoch in range(1, 7):  # loop over the dataset multiple times
+    for epoch in range(1, 10):  # loop over the dataset multiple times
 
         epoch_loss = []
         epoch_start_time = datetime.now()
