@@ -110,7 +110,7 @@ class ElectraClassification(nn.Module):
         self.num_labels = num_labels
         self.config = config
         self.transformer = base_model
-        self.classifier = ClassificationHead(config=config, embed_dim=config.max_position_embeddings if isinstance(base_model, transformers.ReformerModel) else config.hidden_size, kernel_num=kernel_num,
+        self.classifier = ClassificationHead(config=config, embed_dim=2048 if isinstance(base_model, transformers.ReformerModel) else config.hidden_size, kernel_num=kernel_num,
                                              kernel_sizes=kernel_sizes, num_labels=num_labels)
 
     def forward(self, input_ids):
@@ -290,6 +290,8 @@ if __name__ == "__main__":
     else:
         full_base_model = AutoModel.from_pretrained(args.model_path + args.checkpoint)
         model = freeze_model(full_base_model, args.model_name)
+        # ToDo: Pass only the model
+        # ToDo: Edit sh file
         model = ElectraClassification(num_labels=1, base_model=model,
                                       config=full_base_model.config, kernel_num=3, kernel_sizes=[2, 3, 4, 5])
     model.to(dev)
