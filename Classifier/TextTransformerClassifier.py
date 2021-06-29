@@ -346,7 +346,7 @@ if __name__ == "__main__":
             # print("Here4")
             loop.set_description('Epoch {}'.format(epoch))
             loop.set_postfix(loss=round(loss.item(), 4), duration=(datetime.now() - iter_start_time).seconds)
-        torch.save(model, args.root_path + "_Electra_Model/Model_{}".format(epoch + 1))
+        torch.save(model, args.root_path + "/Model_{}".format(epoch))
         print("------------------------{} Epoch Completed----------------".format(epoch))
         epoch_loss = sum(epoch_loss) / len(epoch_loss)
         print("--------------Epoch Loss {} Time Elpased: {}---------------".format(epoch_loss, (
