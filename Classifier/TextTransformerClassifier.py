@@ -248,7 +248,7 @@ if __name__ == "__main__":
     parser.add_argument('--embedding_data', action='store_true', help="")
     parser.add_argument('--electra', action='store_true', help="")
     parser.add_argument('--state_dict', action='store_true', help="")
-    parser.add_argument('--config', action='store_true', help="")
+    parser.add_argument('--config', default=None, type=str, help="")
     args = parser.parse_args()
     args.root_path += "_BLDS" if args.embedding_data else "_Bench-BLDS"
     Path(args.root_path).mkdir(parents=True, exist_ok=True)
