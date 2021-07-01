@@ -4,7 +4,7 @@ from collections import namedtuple
 import torch
 import os
 from ElectraUtil import tie_weights, set_seed, Electra, LogitsAdapter, train, ElectraForPreTraining, return_sorted
-from transformers import RobertaTokenizer, RobertaForMaskedLM, AdamW, AutoConfig, AutoModelForMaskedLM
+from transformers import RobertaTokenizer, RobertaForMaskedLM, AdamW, AutoConfig, AutoModelForMaskedLM, ReformerConfig
 from tokenizers import ByteLevelBPETokenizer
 import pandas as pd
 import re
@@ -339,7 +339,9 @@ if __name__ == "__main__":
     args.start_epoch = 0
     args.start_step = 0
     checkpoint_last = os.path.join(args.output_dir, latest_checkpoint) if latest_checkpoint is not None else os.path.join(args.output_dir, 'checkpoint-last')
-    temp_config = AutoConfig.from_pretrained(args.dis_model_name_or_path)
+    temp_config = ReformerConfig.from_pretrained("/project/6033386/partha9/model_cache/reformer_2048_config", axial_pos_shape=(32, 64),
+                                            vocab_size=tokenizer.vocab_size, max_position_embeddings=2048)
+    # AutoConfig.from_pretrained(args.dis_model_name_or_path)
     temp_config.is_decoder = False
     if os.path.exists(checkpoint_last) and os.listdir(checkpoint_last):
         args.gen_model_name_or_path = os.path.join(checkpoint_last, 'generator')
