@@ -6,6 +6,7 @@ async-generator==1.10
 attrs==20.3.0
 Babel==2.9.0
 backcall==0.2.0
+bcrypt==3.2.0
 bleach==3.3.0
 cachetools==4.2.1
 certifi==2020.12.5
@@ -13,6 +14,7 @@ cffi==1.14.4
 chardet==4.0.0
 click==7.1.2
 ConfigArgParse==0.13.0
+cryptography==3.4.7
 decorator==5.0.7
 defusedxml==0.7.1
 deprecation==2.1.0
@@ -28,6 +30,7 @@ idna==2.10
 ipykernel==5.5.0
 ipython==7.22.0
 ipython-genutils==0.2.0
+ipywidgets==7.6.3
 jedi==0.18.0
 Jinja2==2.11.3
 joblib==1.0.1
@@ -43,6 +46,7 @@ jupyterlab-pygments==0.1.2
 jupyterlab-server==2.4.0
 jupyterlab-system-monitor==0.8.0
 jupyterlab-topbar==0.6.1
+jupyterlab-widgets==1.0.0
 Keras-Preprocessing==1.1.2
 Markdown==3.3.4
 MarkupSafe==1.1.1
@@ -60,6 +64,7 @@ opt-einsum==3.3.0
 packaging==20.9
 pandas==1.2.3
 pandocfilters==1.4.3
+paramiko==2.7.2
 parso==0.8.2
 pexpect==4.8.0
 pickleshare==0.7.5
@@ -72,6 +77,7 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.20
 Pygments==2.8.1
+PyNaCl==1.4.0
 pyparsing==2.4.7
 pyrsistent==0.17.3
 python-dateutil==2.8.1
@@ -85,6 +91,7 @@ sacremoses==0.0.45
 scikit-learn==0.23.0
 scipy==1.4.1
 Send2Trash==1.5.0
+sentencepiece==0.1.95
 six==1.15.0
 sniffio==1.2.0
 tensorboard==2.4.1
