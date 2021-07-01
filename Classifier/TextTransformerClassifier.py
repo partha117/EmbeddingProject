@@ -196,7 +196,7 @@ class BugDataset(Dataset):
         features = self.dataset[idx]
         reportfile_content = features[self.map['report']]
         code_data = zlib.decompress(bytes.fromhex(features[self.map['file_content']])).decode()
-        combined_data = reportfile_content + " " + code_data
+        combined_data = str(reportfile_content) + " " + code_data
         return features[self.map['cid']], combined_data, features[self.map['match']]
 
 
