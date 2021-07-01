@@ -176,7 +176,7 @@ class BugDataset(Dataset):
                 file = open(self.tmp + str(item[1]['cid']) + "_content.txt", "w")
                 file.write(item[1]['file_content'])
                 file.close()
-        self.dataset.drop(columns=['report', 'file_content'], inplace=True)
+        #self.dataset.drop(columns=['report', 'file_content'], inplace=True)
         self.map = {name: index for index, name in enumerate(self.dataset.columns.tolist())}
         self.dataset = self.dataset.to_numpy()
         self.parser = parser
@@ -194,14 +194,9 @@ class BugDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
         features = self.dataset[idx]
-        codefile = open(self.tmp + str(features[self.map['cid']]) + "_content.txt", "r")
-        codefile_content = codefile.read()
-
-        reportfile = open(self.tmp + str(features[self.map['cid']]) + "_report.txt", "r")
-        reportfile_content = reportfile.read()
-        code_data = zlib.decompress(bytes.fromhex(codefile_content)).decode()
+        reportfile_content = features[self.map['report']]
+        code_data = zlib.decompress(bytes.fromhex(features[self.map['file_content']])).decode()
         combined_data = reportfile_content + " " + code_data
-        # return features[self.map['cid']], self.tokenizer.encode_plus(combined_data,truncation=True, max_length=self.max_size)['input_ids'], features[self.map['match']]
         return features[self.map['cid']], combined_data, features[self.map['match']]
 
 
@@ -295,11 +290,6 @@ if __name__ == "__main__":
         model = ElectraClassification(num_labels=1, base_model=model,
                                       config=full_base_model.config, kernel_num=3, kernel_sizes=[2, 3, 4, 5])
     model.to(dev)
-    Path(args.root_path + "_Dataset/{}/".format(args.project_name.split("/")[-2])).mkdir(parents=True, exist_ok=True)
-    pickle.dump(dataset, open(
-        args.root_path + "_Dataset/{}/{}_full_dataset.pickle".format(args.project_name.split("/")[-2],
-                                                                     args.project_name.split("/")[-2]),
-        "wb"))
 
 
 

@@ -11,10 +11,10 @@
 export CUDA_LAUNCH_BLOCKING=1; python /home/partha9/EmbeddingProject/Classifier/TextTransformerClassifier.py \
 --root_path /project/def-m2nagapp/partha9/Aster/Classifier_Text_Reformer_QA \
 --model_path /project/def-m2nagapp/partha9/Aster/Text_Reformer_QA/ \
---checkpoint train_output/checkpoint-6500/ \
+--checkpoint train_output/CheckPoint_2000/ \
 --project_name /project/def-m2nagapp/partha9/Dataset/CombinedData/ \
 --scratch_path /scratch/partha9/Dataset/ \
---tokenizer_root /project/def-m2nagapp/partha9/Aster/Text_Reformer_MLM/ \
+--tokenizer_root /project/def-m2nagapp/partha9/Aster/Text_Reformer_QA/ \
 --token_max_size 2048 \
 --batch_size 16 \
 --embedding_data
