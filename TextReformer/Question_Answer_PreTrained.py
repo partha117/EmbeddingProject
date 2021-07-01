@@ -216,7 +216,7 @@ if __name__ == "__main__":
         tokenizer.save_model(root_path + "/tokenizer/", "./aster")
     tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    save_at = 500
+    save_at = 200
     # ToDo: Load a MLM pre-trained model in that case config is not required
     # config = ReformerConfig.from_pretrained("/project/6033386/partha9/model_cache/reformer_config", axial_pos_shape=(32, 64),
     #                                         vocab_size=tokenizer.vocab_size, max_position_embeddings=4096)
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     model.train()
     optim = AdamW(model.parameters(), lr=5e-5)
     train_loader = DataLoader(train_dataset, batch_size=6, shuffle=True)
-    for epoch in range(3):
+    for epoch in range(7):
         model.train()
         loop = tqdm(train_loader, leave=True)
         for i, batch in enumerate(loop):

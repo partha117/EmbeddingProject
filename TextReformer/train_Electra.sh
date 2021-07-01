@@ -16,7 +16,7 @@ export CUDA_LAUNCH_BLOCKING=1; python /home/partha9/EmbeddingProject/TextReforme
 --per_gpu_train_batch_size 8 \
 --per_gpu_eval_batch_size 8 \
 --learning_rate 1e-5 \
---num_train_epochs 5 \
+--num_train_epochs 10 \
 --gradient_accumulation_steps 1 \
 --overwrite_output_dir \
 --gen_model_name_or_path /project/6033386/partha9/model_cache/reformer_model \
