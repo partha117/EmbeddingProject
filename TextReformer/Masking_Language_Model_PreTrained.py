@@ -196,9 +196,9 @@ if __name__ == "__main__":
     training_args = TrainingArguments(
         output_dir=root_path + "/train_output/",
         overwrite_output_dir=True,
-        num_train_epochs=1,
-        per_device_train_batch_size=2,
-        save_steps=500,
+        num_train_epochs=10,
+        per_device_train_batch_size=8,
+        save_steps=200,
         save_total_limit=4,
         dataloader_drop_last=True
     )
