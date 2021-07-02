@@ -229,7 +229,7 @@ if __name__ == "__main__":
     model.train()
     optim = AdamW(model.parameters(), lr=5e-5)
     train_loader = DataLoader(train_dataset, batch_size=6, shuffle=True)
-    for epoch in range(7):
+    for epoch in range(10):
         model.train()
         loop = tqdm(train_loader, leave=True)
         for i, batch in enumerate(loop):
