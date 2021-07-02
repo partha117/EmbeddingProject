@@ -14,7 +14,7 @@ from transformers import RobertaModel, BertPreTrainedModel, AutoConfig, \
     get_linear_schedule_with_warmup, AdamW, AutoModel
 from transformers.models.electra.modeling_electra import ElectraDiscriminatorPredictions
 import numpy as np
-
+from datetime import datetime
 
 def log(t, eps=1e-9):
     return torch.log(t + eps)
@@ -369,9 +369,10 @@ def train(args, train_dataset, eval_dataset, model, generator, discriminator, to
         for step, batch in enumerate(train_dataloader):
 
             batch = tuple(t.to(args.device) for t in batch)
+            print("Before: " + str(datetime.now()))
             loss, loss_mlm, loss_disc, acc_gen, acc_disc, disc_labels, disc_pred = model(batch[0],
                                                                                          attention_mask=batch[1])
-
+            print("Steps: " +  str(step) + "After: " + str(datetime.now()))
             if args.n_gpu > 1:
                 loss = loss.mean()  # mean() to average on multi-gpu parallel training
                 loss_mlm = loss_mlm.mean()
