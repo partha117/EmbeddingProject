@@ -372,7 +372,7 @@ def train(args, train_dataset, eval_dataset, model, generator, discriminator, to
             print("Before: " + str(datetime.now()))
             loss, loss_mlm, loss_disc, acc_gen, acc_disc, disc_labels, disc_pred = model(batch[0],
                                                                                          attention_mask=batch[1])
-            print("Steps: " +  str(step) + "After: " + str(datetime.now()))
+            print("Steps: " + str(step) + "After: " + str(datetime.now()))
             if args.n_gpu > 1:
                 loss = loss.mean()  # mean() to average on multi-gpu parallel training
                 loss_mlm = loss_mlm.mean()
@@ -409,6 +409,18 @@ def train(args, train_dataset, eval_dataset, model, generator, discriminator, to
 
                 if args.local_rank in [-1, 0] and args.logging_steps > 0 and global_step % args.logging_steps == 0:
                     logger.info(" Training: Epoch=%s, Step = %s", idx, global_step)
+                    last_output_dir = os.path.join(args.output_dir, 'checkpoint-{}'.format(idx))
+                    if not os.path.exists(last_output_dir):
+                        os.makedirs(last_output_dir)
+                    generator_path = os.path.join(last_output_dir, 'generator')
+                    discriminator_path = os.path.join(last_output_dir, 'discriminator')
+                    gen_model_to_save = generator.module if hasattr(generator,
+                                                                    'module') else generator  # Take care of distributed/parallel training
+                    disc_model_to_save = discriminator.module if hasattr(discriminator,
+                                                                         'module') else discriminator
+                    # gen_model_to_save.save_pretrained(generator_path)
+                    torch.save(gen_model_to_save, generator_path)
+                    torch.save(disc_model_to_save, discriminator_path)
             if args.max_steps > 0 and global_step > args.max_steps:
                 break
         # nb_train_steps = len(train_dataloader)
