@@ -205,8 +205,8 @@ if __name__ == "__main__":
     config = ReformerConfig.from_pretrained("/project/6033386/partha9/model_cache/reformer_2048_config", axial_pos_shape=(32, 64),
                                             vocab_size=tokenizer.vocab_size, max_position_embeddings=2048) # ReformerConfig.from_pretrained("google/reformer-enwik8")
     config.is_decoder = False
-    model = ReformerForMaskedLM(
-        config=config)  # ReformerForMaskedLM.from_pretrained("google/reformer-enwik8",config=config)
+    # model = ReformerForMaskedLM(config=config)
+    model = ReformerForMaskedLM.from_pretrained("/project/def-m2nagapp/partha9/Aster/Text_Reformer_MLM" + "/train_output/" + "checkpoint-11800/")
     trainer = Trainer(
         model=model,
         args=training_args,
