@@ -223,7 +223,7 @@ if __name__ == "__main__":
     # config.is_decoder = False
     # model = ReformerForQuestionAnswering(config=config)
     model = ReformerForQuestionAnswering.from_pretrained(
-        "/project/def-m2nagapp/partha9/Aster/Text_Reformer_MLM" + "/train_output/" + "checkpoint-11600/")
+        "/project/def-m2nagapp/partha9/Aster/Text_Reformer_MLM" + "/train_output/" + "checkpoint-11200/")
     train_dataset = BugDataset(dataframe=train_data, tokenizer=tokenizer)
     model.to(device)
     model.train()
