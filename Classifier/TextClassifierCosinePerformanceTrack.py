@@ -167,7 +167,6 @@ if __name__ == "__main__":
     parser.add_argument('--config', default=None, type=str, help="")
     options = parser.parse_args()
 
-    model_no = int(options.model_no)
     scratch_path = options.scratch_path
     model_path = options.model_path
     tokenizer_path = options.tokenizer_path
