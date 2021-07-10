@@ -5,7 +5,7 @@ import zlib
 import os
 import sys
 sys.path.append(os.path.abspath("/home/partha9/EmbeddingProject"))
-from Classifier.TextTransformerClassifier import ElectraClassification, ClassificationHead, BugDataset, get_combined_full_dataset, batch_parser
+from Classifier.TransformerClassifierElectra import ElectraClassification, ClassificationHead, BugDataset, get_combined_full_dataset, batch_parser
 from pathlib import Path
 import numpy as np
 import pickle
@@ -39,6 +39,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
     top_k_counter = [0] * 20
     mrr_value = np.array([])
     map_value = np.array([])
+    position_array = []
     if torch.cuda.is_available():
         dev = "cuda:0"
     else:
@@ -58,7 +59,6 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
         #ToDo: Verify K
         test_dataset = get_sample_set(idx=i, positive_test_data=positive_test_data,
                                       combined_full_dataset=combined_full_dataset, k=10)
-        print(len(test_dataset))
         test_bugdataset = BugDataset(project_name=project_name, dataframe=test_dataset, scratch_path=scratch_path, parser=parser)
         test_dataloader = DataLoader(test_bugdataset, batch_size=30, pin_memory=True, num_workers=1)
         # data = next(iter(test_dataloader))
@@ -90,6 +90,10 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
         print(sorted_prediction_value)
         lowest_retrieval_rank = (sorted_prediction_value == 0).argsort(axis=0)
         print(lowest_retrieval_rank, lowest_retrieval_rank[0])
+        position_array.append({
+            "BugId": positive_test_data.iloc[i]["bug_id"],
+            "position": (lowest_retrieval_rank[0] + 1)
+        })
         mrr_value = np.append(mrr_value, np.array(1.0 / (lowest_retrieval_rank[0] + 1)))
 
         # average precision calculation
@@ -123,7 +127,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
         acc = counter / (len(positive_test_data))
         acc_dict[i + 1] = round(acc, 3)
 
-    return acc_dict, mean_reciprocal_rank, mean_average_precision, auc_score
+    return acc_dict, mean_reciprocal_rank, mean_average_precision, auc_score, pd.DataFrame(position_array)
 
 
 if __name__ == "__main__":
@@ -153,17 +157,25 @@ if __name__ == "__main__":
                                  tokenizer_path + "tokenizer/aster-merges.txt")
 
     project_list = ["AspectJ", "Birt", "Tomcat","SWT","JDT","Eclipse_Platform_UI"]
+    all_result = None
     for project_name in project_list:
         dump_file = open(model_path + "Result_{}.txt".format(project_name), "w")
         print("Starting Project {}".format(project_name))
         test_dataset = pd.read_csv(test_data_path + "{}_test.csv".format(project_name))
         positive_test_data = get_positive_dataset(test_dataset)
-        acc_dict, mean_reciprocal_rank, mean_average_precision, auc_score = calculate_metrices(test_dataset,
+        acc_dict, mean_reciprocal_rank, mean_average_precision, auc_score, dataframe = calculate_metrices(test_dataset,
                                                                                                positive_test_data,
                                                                                                project_name, tokenizer,
                                                                                                scratch_path=scratch_path)
 
+        dataframe['project'] = project_name
+        if all_result is None:
+            all_result = dataframe
+        else:
+            all_result = pd.concat([all_result, dataframe])
         acc_dict['mean_reciprocal_rank'] = mean_reciprocal_rank
         acc_dict['mean_average_precision'] = mean_average_precision
         acc_dict['auc_score'] = auc_score
         json.dump(acc_dict, dump_file)
+
+    all_result.to_csv(model_path + "all_position_result.csv", index=False)
