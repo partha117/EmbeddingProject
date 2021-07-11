@@ -125,7 +125,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
                                             return_tensors='pt')[
                     'input_ids']
             model.eval()
-            print("Labels", labels)
+            # print("Labels", labels)
             with torch.no_grad():
                 code_embedding = model(input_ids=code_input.to(dev))[0].mean(1).detach().cpu().numpy()
                 report_embedding = model(input_ids=report_input.to(dev))[0].mean(1).detach().cpu().numpy()
@@ -138,18 +138,18 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
             if not true_positive_flag:
                 true_positive_location += np.where(labels == 1)[0][0] if np.any(labels.numpy() == 1) else len(labels)
                 true_positive_flag = True
-            print("True Positive Iter", true_positive_location)
+            # print("True Positive Iter", true_positive_location)
         # mrr calculation
-        print("True Positive Location", true_positive_location)
-        print("Code Shape", all_code_embedding.shape)
-        print("Report Shape", all_report_embedding.shape)
+        # print("True Positive Location", true_positive_location)
+        # print("Code Shape", all_code_embedding.shape)
+        # print("Report Shape", all_report_embedding.shape)
         similarity = 1 - cdist(all_code_embedding, all_report_embedding, metric='cosine')
-        print("Similarity Shape", similarity.shape)
-        print("Similarity", similarity)
+        # print("Similarity Shape", similarity.shape)
+        # print("Similarity", similarity)
         true_positive_value = similarity[true_positive_location, 0]
-        print("True Positive Value", true_positive_value)
-        print("All Ranks", np.sum(similarity[:, 0] > true_positive_value) + 1)
-        print("All Ranks Alternative", np.sum(similarity > true_positive_value, axis=-1) + 1)
+        # print("True Positive Value", true_positive_value)
+        # print("All Ranks", np.sum(similarity[:, 0] > true_positive_value) + 1)
+        # print("All Ranks Alternative", np.sum(similarity > true_positive_value, axis=-1) + 1)
         rank = np.sum(similarity[:, 0] > true_positive_value) + 1
 
         print("Rank", rank)
