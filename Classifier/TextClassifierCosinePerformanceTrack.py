@@ -132,8 +132,8 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
                     all_code_embedding = code_embedding
                     all_report_embedding = report_embedding
                 else:
-                    all_code_embedding = all_code_embedding.append(code_embedding)
-                    all_report_embedding = all_report_embedding.append(report_embedding)
+                    all_code_embedding = np.concatenate([all_code_embedding, code_embedding])
+                    all_report_embedding = np.concatenate([all_report_embedding, report_embedding])
             true_positive_location += np.where(labels == 1)[0] if np.any(labels.numpy() == 1) else len(labels)
         # mrr calculation
 
