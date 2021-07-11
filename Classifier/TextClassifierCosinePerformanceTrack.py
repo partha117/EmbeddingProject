@@ -161,7 +161,7 @@ if __name__ == "__main__":
     parser.add_argument('--model_path', help='Model Number')
     parser.add_argument('--tokenizer_path', help='Model Number')
     parser.add_argument('--test_data_path', help='Model Number')
-    parser.add_argument('--model_name', help='Model Number')
+    parser.add_argument("--model_name", default=None, type=str, help="")
     parser.add_argument('--token_max_size', help='Model Number')
     parser.add_argument('--electra', action='store_true', help="")
     parser.add_argument('--state_dict', action='store_true', help="")
