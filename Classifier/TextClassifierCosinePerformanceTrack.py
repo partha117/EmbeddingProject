@@ -105,7 +105,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
         print((i / len(positive_test_data)) * 100)
         # ToDo: Verify K
         test_dataset = get_sample_set(idx=i, positive_test_data=positive_test_data,
-                                      combined_full_dataset=combined_full_dataset, k=30)
+                                      combined_full_dataset=combined_full_dataset, k=10)
         test_bugdataset = BugDataset(project_name=project_name, dataframe=test_dataset, scratch_path=scratch_path,
                                      parser=parser)
         test_dataloader = DataLoader(test_bugdataset, batch_size=30, pin_memory=True, num_workers=1)
