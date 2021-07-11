@@ -148,9 +148,9 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
         print("Similarity", similarity)
         true_positive_value = similarity[true_positive_location][0]
         print("True Positive Value", true_positive_value)
-        print("All Ranks", np.sum(similarity > true_positive_value, axis=0) + 1)
+        print("All Ranks", np.sum(similarity[:, 0] > true_positive_value) + 1)
         print("All Ranks Alternative", np.sum(similarity > true_positive_value, axis=-1) + 1)
-        rank = np.max(np.sum(similarity > true_positive_value, axis=0) + 1)
+        rank = np.sum(similarity[:, 0] > true_positive_value) + 1
 
         print("Rank", rank)
         position_array.append({
