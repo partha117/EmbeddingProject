@@ -134,7 +134,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
                 else:
                     all_code_embedding = all_code_embedding.append(code_embedding)
                     all_report_embedding = all_report_embedding.append(report_embedding)
-            true_positive_location += np.where(labels == 1)[0] if np.any(labels == 1) else len(labels)
+            true_positive_location += np.where(labels == 1)[0] if np.any(labels.numpy() == 1) else len(labels)
         # mrr calculation
 
         print("Code Shape", all_code_embedding.shape)
