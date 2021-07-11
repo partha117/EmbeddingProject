@@ -155,6 +155,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
         print("Rank", rank)
         position_array.append({
             "BugId": positive_test_data.iloc[i]["bug_id"],
+            "CId": positive_test_data.iloc[i]["cid"],
             "position": rank
         })
 
