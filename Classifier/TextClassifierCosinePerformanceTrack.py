@@ -113,6 +113,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
         all_code_embedding = None
         all_report_embedding = None
         true_positive_location = 0
+        true_positive_flag = False
         for batch in test_dataloader:
             _, report_input, code_input, labels = batch
 
@@ -134,7 +135,9 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
                 else:
                     all_code_embedding = np.concatenate([all_code_embedding, code_embedding])
                     all_report_embedding = np.concatenate([all_report_embedding, report_embedding])
-            true_positive_location += np.where(labels == 1)[0][0] if np.any(labels.numpy() == 1) else len(labels)
+            if not true_positive_flag:
+                true_positive_location += np.where(labels == 1)[0][0] if np.any(labels.numpy() == 1) else len(labels)
+                true_positive_flag = True
             print("True Positive Iter", true_positive_location)
         # mrr calculation
         print("True Positive Location", true_positive_location)
@@ -143,9 +146,10 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
         similarity = 1 - cdist(all_code_embedding, all_report_embedding, metric='cosine')
         print("Similarity Shape", similarity.shape)
         print("Similarity", similarity)
-        true_positive_value = similarity[0][true_positive_location]
+        true_positive_value = similarity[true_positive_location][0]
         print("True Positive Value", true_positive_value)
         print("All Ranks", np.sum(similarity > true_positive_value, axis=0) + 1)
+        print("All Ranks Alternative", np.sum(similarity > true_positive_value, axis=-1) + 1)
         rank = np.max(np.sum(similarity > true_positive_value, axis=0) + 1)
 
         print("Rank", rank)
