@@ -146,7 +146,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
         similarity = 1 - cdist(all_code_embedding, all_report_embedding, metric='cosine')
         print("Similarity Shape", similarity.shape)
         print("Similarity", similarity)
-        true_positive_value = similarity[true_positive_location][0]
+        true_positive_value = similarity[true_positive_location, 0]
         print("True Positive Value", true_positive_value)
         print("All Ranks", np.sum(similarity[:, 0] > true_positive_value) + 1)
         print("All Ranks Alternative", np.sum(similarity > true_positive_value, axis=-1) + 1)
