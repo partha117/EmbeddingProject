@@ -126,8 +126,8 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
             model.eval()
             print("Labels", labels)
             with torch.no_grad():
-                code_embedding = model(input_ids=code_input.to(dev))[0].mean(1).detach().numpy()
-                report_embedding = model(input_ids=report_input.to(dev))[0].mean(1).detach().numpy()
+                code_embedding = model(input_ids=code_input.to(dev))[0].mean(1).detach().cpu().numpy()
+                report_embedding = model(input_ids=report_input.to(dev))[0].mean(1).detach().cpu().numpy()
                 if all_code_embedding is None and all_report_embedding is None:
                     all_code_embedding = code_embedding
                     all_report_embedding = report_embedding
