@@ -199,6 +199,7 @@ if __name__ == "__main__":
             full_base_model = torch.load(options.model_path + options.checkpoint)
             model = freeze_model(full_base_model.electra, options.model_name)
     else:
+        print(options.model_path + options.checkpoint)
         full_base_model = AutoModel.from_pretrained(options.model_path + options.checkpoint)
         model = freeze_model(full_base_model, options.model_name)
     model.to(dev)
