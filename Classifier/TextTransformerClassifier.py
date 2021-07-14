@@ -90,7 +90,7 @@ class ClassificationHead(nn.Module):
         self.kernel_sizes = kernel_sizes
         self.conv_layers = nn.ModuleList(
             [nn.Conv2d(1, self.kernel_num, (k, self.embed_dim)) for k in self.kernel_sizes])
-        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.dropout = nn.Dropout(0.1)
         self.out_proj = nn.Linear(len(self.kernel_sizes) * self.kernel_num, self.num_labels)
 
     def forward(self, hidden_states, **kwargs):
