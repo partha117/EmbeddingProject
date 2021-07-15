@@ -29,7 +29,7 @@ from Reformer import ElectraUtil
 from Reformer.ElectraUtil import ElectraForPreTraining
 import argparse
 import uuid
-
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 def freeze_model(model, model_name):
     for param in getattr(model, model_name).parameters() if model_name else model.parameters():
@@ -240,7 +240,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", default=None, type=int, help="")
     parser.add_argument("--model_name", default=None, type=str, help="")
     parser.add_argument("--model_no", default=None, type=str, help="")
-    parser.add_argument("--lr_rate", default=str(0.01), type=str, help="")
+    parser.add_argument("--lr_rate", default=str(0.002), type=str, help="")
     parser.add_argument('--combined_data', action='store_true', help="")
     parser.add_argument('--embedding_data', action='store_true', help="")
     parser.add_argument('--electra', action='store_true', help="")
@@ -307,6 +307,7 @@ if __name__ == "__main__":
                             drop_last=True)
     criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=float(args.lr_rate))
+    scheduler = ReduceLROnPlateau(optimizer, 'min', patience=10, cooldown=3, verbose=True)
     loss_list = []
 
     Path(args.root_path + "_Model").mkdir(parents=True, exist_ok=True)
@@ -339,7 +340,8 @@ if __name__ == "__main__":
             loss_list.append(loss.item())
             epoch_loss.append(loss)
             loss.backward()
-            optimizer.step()
+            # optimizer.step()
+            scheduler.step()
             gc.collect()
             # print("Here4")
             loop.set_description('Epoch {}'.format(epoch))
