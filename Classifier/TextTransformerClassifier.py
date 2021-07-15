@@ -239,10 +239,13 @@ if __name__ == "__main__":
     parser.add_argument("--token_max_size", default=None, type=int, help="")
     parser.add_argument("--batch_size", default=None, type=int, help="")
     parser.add_argument("--model_name", default=None, type=str, help="")
+    parser.add_argument("--model_no", default=None, type=str, help="")
+    parser.add_argument("--lr_rate", default=str(0.01), type=str, help="")
     parser.add_argument('--combined_data', action='store_true', help="")
     parser.add_argument('--embedding_data', action='store_true', help="")
     parser.add_argument('--electra', action='store_true', help="")
     parser.add_argument('--state_dict', action='store_true', help="")
+    parser.add_argument('--pretrained', action='store_true', help="")
     parser.add_argument('--config', default=None, type=str, help="")
     args = parser.parse_args()
     args.root_path += "_BLDS" if args.embedding_data else "_Bench-BLDS"
@@ -268,27 +271,30 @@ if __name__ == "__main__":
     # config = AutoConfig.from_pretrained(args.model_path,
     #                                     num_labels=1)  # RobertaConfig.from_pretrained(model_path, num_labels=1)
     print("Loading models")
-    if args.electra:
-        if args.state_dict:
-            temp_config = AutoConfig.from_pretrained(args.config)
-            temp_config.is_decoder = False
-            temp_config.output_hidden_states = True
-            full_base_model_dict = torch.load(args.model_path + args.checkpoint)
-            full_base_model = ElectraForPreTraining(temp_config)
-            full_base_model.load_state_dict(full_base_model_dict)
-            model = freeze_model(full_base_model.electra, args.model_name)
-        else:
-            full_base_model = torch.load(args.model_path + args.checkpoint)
-            model = freeze_model(full_base_model.electra, args.model_name)
-        model = ElectraClassification(num_labels=1, base_model=model,
-                                  config=full_base_model.electra.config, kernel_num=3, kernel_sizes=[2, 3, 4, 5])
+    if args.pretrained:
+        model = torch.load(args.root_path + "/Model_{}".format(args.model_no))
     else:
-        full_base_model = AutoModel.from_pretrained(args.model_path + args.checkpoint)
-        model = freeze_model(full_base_model, args.model_name)
-        # ToDo: Pass only the model
-        # ToDo: Edit sh file
-        model = ElectraClassification(num_labels=1, base_model=model,
-                                      config=full_base_model.config, kernel_num=3, kernel_sizes=[2, 3, 4, 5])
+        if args.electra:
+            if args.state_dict:
+                temp_config = AutoConfig.from_pretrained(args.config)
+                temp_config.is_decoder = False
+                temp_config.output_hidden_states = True
+                full_base_model_dict = torch.load(args.model_path + args.checkpoint)
+                full_base_model = ElectraForPreTraining(temp_config)
+                full_base_model.load_state_dict(full_base_model_dict)
+                model = freeze_model(full_base_model.electra, args.model_name)
+            else:
+                full_base_model = torch.load(args.model_path + args.checkpoint)
+                model = freeze_model(full_base_model.electra, args.model_name)
+            model = ElectraClassification(num_labels=1, base_model=model,
+                                      config=full_base_model.electra.config, kernel_num=3, kernel_sizes=[2, 3, 4, 5])
+        else:
+            full_base_model = AutoModel.from_pretrained(args.model_path + args.checkpoint)
+            model = freeze_model(full_base_model, args.model_name)
+            # ToDo: Pass only the model
+            # ToDo: Edit sh file
+            model = ElectraClassification(num_labels=1, base_model=model,
+                                          config=full_base_model.config, kernel_num=3, kernel_sizes=[2, 3, 4, 5])
     model.to(dev)
 
 
@@ -300,7 +306,7 @@ if __name__ == "__main__":
     dataloader = DataLoader(dataset, batch_size=int(args.batch_size), pin_memory=True, num_workers=2, sampler=sampler,
                             drop_last=True)
     criterion = nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.01)
+    optimizer = optim.Adam(model.parameters(), lr=float(args.lr_rate))
     loss_list = []
 
     Path(args.root_path + "_Model").mkdir(parents=True, exist_ok=True)
