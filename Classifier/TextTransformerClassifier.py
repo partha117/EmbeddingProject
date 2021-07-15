@@ -341,7 +341,7 @@ if __name__ == "__main__":
             epoch_loss.append(loss)
             loss.backward()
             # optimizer.step()
-            scheduler.step()
+            scheduler.step(loss)
             gc.collect()
             # print("Here4")
             loop.set_description('Epoch {}'.format(epoch))
