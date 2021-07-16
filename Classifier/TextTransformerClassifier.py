@@ -307,7 +307,7 @@ if __name__ == "__main__":
                             drop_last=True)
     criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=float(args.lr_rate))
-    scheduler = ReduceLROnPlateau(optimizer, 'min', patience=10, cooldown=3, verbose=True)
+    scheduler = ReduceLROnPlateau(optimizer, 'min', patience=40, cooldown=20, verbose=True)
     loss_list = []
 
     Path(args.root_path + "_Model").mkdir(parents=True, exist_ok=True)
