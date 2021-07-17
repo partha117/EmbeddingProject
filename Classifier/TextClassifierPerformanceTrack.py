@@ -92,6 +92,7 @@ def calculate_metrices(combined_full_dataset, positive_test_data, project_name, 
         print(lowest_retrieval_rank, lowest_retrieval_rank[0])
         position_array.append({
             "BugId": positive_test_data.iloc[i]["bug_id"],
+            "CId": positive_test_data.iloc[i]["cid"],
             "position": (lowest_retrieval_rank[0] + 1)
         })
         mrr_value = np.append(mrr_value, np.array(1.0 / (lowest_retrieval_rank[0] + 1)))

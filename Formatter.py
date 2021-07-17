@@ -52,7 +52,7 @@ def csv_formatter():
 
                 path = "Results/" + name + ".csv"
                 df = pd.read_csv(path)
-                df.sort_values(by=['BugId', 'project'], inplace=True,ignore_index=True)
+                df.sort_values(by=['BugId', 'CId', 'project'], inplace=True, ignore_index=True)
                 if all_ranks is None:
                     df.rename(columns={"position": name}, inplace=True)
                     all_ranks = df
@@ -67,5 +67,7 @@ def csv_formatter():
                 #     all_ranks = all_ranks.join(df)
                 # del df
     all_ranks.to_csv("Rank_Analysis.csv", index=False)
-
+def get_matrix_corr():
+    df = pd.read_csv("Rank_Analysis.csv")
+    df.drop(columns=[''])
 csv_formatter()
