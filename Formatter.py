@@ -58,16 +58,34 @@ def csv_formatter():
                     all_ranks = df
                 else:
                     all_ranks[name] = df['position']
+    all_ranks.to_csv("Full_Models_Rank_Analysis.csv", index=False)
 
-                # df = pd.read_csv(path, index_col=['BugId', 'project'])
-                # df.rename(columns={"position": name}, inplace=True)
-                # if all_ranks is None:
-                #     all_ranks = df
-                # else:
-                #     all_ranks = all_ranks.join(df)
-                # del df
-    all_ranks.to_csv("Rank_Analysis.csv", index=False)
-def get_matrix_corr():
-    df = pd.read_csv("Rank_Analysis.csv")
-    df.drop(columns=[''])
-csv_formatter()
+def csv_formatter_embeddings():
+    all_ranks =  None
+    for model in ["Extended_Roberta", "Reformer"]:
+        for training in ["MLM", "QA", "Electra"]:
+                name = (
+                        model if model == "Reformer" else "Roberta") + "_" + training
+
+                path = "Results/Embeddings/" + name + ".csv"
+                df = pd.read_csv(path)
+                df.sort_values(by=['BugId', 'CId', 'project'], inplace=True, ignore_index=True)
+                if all_ranks is None:
+                    df.rename(columns={"position": name}, inplace=True)
+                    all_ranks = df
+                else:
+                    all_ranks[name] = df['position']
+    all_ranks.to_csv("Embeddings_Rank_Analysis.csv", index=False)
+def get_matrix_corr(model=True):
+    if model:
+        df = pd.read_csv("Full_Models_Rank_Analysis.csv")
+    else:
+        df = pd.read_csv("Embeddings_Rank_Analysis.csv")
+    df.drop(columns=['BugId', 'CId', 'project'], inplace=True)
+    mat_corr = df.corr()
+    if model:
+        mat_corr.to_csv("Full_Models_Correlation.csv")
+    else:
+        mat_corr.to_csv("Embeddings_Correlation.csv")
+csv_formatter_embeddings()
+get_matrix_corr(model=False)
