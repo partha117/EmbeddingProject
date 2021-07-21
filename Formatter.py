@@ -75,17 +75,17 @@ def csv_formatter_embeddings():
                     all_ranks = df
                 else:
                     all_ranks[name] = df['position']
-    all_ranks.to_csv("Embeddings_Rank_Analysis.csv", index=False)
+    all_ranks.to_csv("Analyzed_Results/Embeddings_Rank_Analysis.csv", index=False)
 def get_matrix_corr(model=True):
     if model:
-        df = pd.read_csv("Full_Models_Rank_Analysis.csv")
+        df = pd.read_csv("Analyzed_Results/Full_Models_Rank_Analysis.csv")
     else:
-        df = pd.read_csv("Embeddings_Rank_Analysis.csv")
+        df = pd.read_csv("Analyzed_Results/Embeddings_Rank_Analysis.csv")
     df.drop(columns=['BugId', 'CId', 'project'], inplace=True)
     mat_corr = df.corr()
     if model:
-        mat_corr.to_csv("Full_Models_Correlation.csv")
+        mat_corr.to_csv("Analyzed_Results/Full_Models_Correlation.csv")
     else:
-        mat_corr.to_csv("Embeddings_Correlation.csv")
+        mat_corr.to_csv("Analyzed_Results/Embeddings_Correlation.csv")
 csv_formatter_embeddings()
 get_matrix_corr(model=False)

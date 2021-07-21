@@ -17,5 +17,5 @@ def calculate_mrr(load_file_name, save_file_name):
     mrr_df.to_csv(save_file_name)
 
 
-calculate_mrr(load_file_name="Embeddings_Rank_Analysis.csv", save_file_name="Embeddings_Mrr.csv")
-calculate_mrr(load_file_name="Full_Models_Rank_Analysis.csv", save_file_name="Full_Models_Mrr.csv")
+calculate_mrr(load_file_name="Analyzed_Results/Embeddings_Rank_Analysis.csv", save_file_name="Analyzed_Results/Embeddings_Mrr.csv")
+calculate_mrr(load_file_name="Analyzed_Results/Full_Models_Rank_Analysis.csv", save_file_name="Analyzed_Results/Full_Models_Mrr.csv")
