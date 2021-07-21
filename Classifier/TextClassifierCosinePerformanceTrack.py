@@ -169,6 +169,7 @@ if __name__ == "__main__":
     parser.add_argument('--scratch_path', help='Model Number')
     parser.add_argument('--batch_size', help='Model Number')
     parser.add_argument('--model_path', help='Model Number')
+    parser.add_argument('--model_name', help='Model Number')
     parser.add_argument('--tokenizer_path', help='Model Number')
     parser.add_argument('--test_data_path', help='Model Number')
     parser.add_argument("--model_name", default=None, type=str, help="")
@@ -193,7 +194,7 @@ if __name__ == "__main__":
             temp_config.is_decoder = False
             temp_config.output_hidden_states = True
             full_base_model_dict = torch.load(options.model_path + options.checkpoint)
-            full_base_model = ElectraForPreTraining(temp_config)
+            full_base_model = AutoModel.from_pretrained(options.model_name) if options.bare else ElectraForPreTraining(temp_config)
             full_base_model.load_state_dict(full_base_model_dict)
             model = freeze_model(full_base_model, options.model_name) if options.bare else freeze_model(full_base_model.electra, options.model_name)
         else:
