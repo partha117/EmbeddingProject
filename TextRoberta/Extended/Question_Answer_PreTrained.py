@@ -177,8 +177,8 @@ class BugDataset(Dataset):
             report_files = rows['before_fix_uuid_file_path'].map(
                 lambda x: scratch_path + "partha9/Data/Report_Files/" + get_uuid(x) + ".txt").tolist()
         temp = file_reader(before_fix_file_path, after_fix_file_path, report_files)
-        before, after = self.tokenizer.encode_plus(temp[0], temp[1], truncation=True, max_length=1498)['input_ids'], \
-                        self.tokenizer.encode_plus(temp[0], temp[2], truncation=True, max_length=1498)['input_ids']
+        before, after = self.tokenizer.encode_plus(temp[0], temp[1], truncation=True, max_length=512)['input_ids'], \
+                        self.tokenizer.encode_plus(temp[0], temp[2], truncation=True, max_length=512)['input_ids']
         start, end = find_difference(before, after)
         report_context = self.tokenizer.encode_plus(temp[0], temp[1], truncation=True, max_length=512, padding=True,
                                                     pad_to_multiple_of=512)
