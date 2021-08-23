@@ -87,5 +87,6 @@ def get_matrix_corr(model=True):
         mat_corr.to_csv("Analyzed_Results/Full_Models_Correlation.csv")
     else:
         mat_corr.to_csv("Analyzed_Results/Embeddings_Correlation.csv")
-csv_formatter_embeddings()
-get_matrix_corr(model=False)
+json_formatter()
+csv_formatter()
+# get_matrix_corr(model=False)

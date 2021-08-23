@@ -265,8 +265,10 @@ if __name__ == "__main__":
             "/project/def-m2nagapp/partha9/Dataset/JDT"), get_combined_full_dataset(
             "/project/def-m2nagapp/partha9/Dataset/Eclipse_Platform_UI")
         combined_df = create_random_dataset([df1, df2, df3, df4, df5, df6], full_size=5000)
+        combined_df.to_csv("Bench_BLDS_Dataset.csv", index=False)
     elif args.embedding_data:
         combined_df = get_embedding_dataset(file_path=file_path)
+        combined_df.to_csv("BLDS_Dataset.csv", index=False)
     dataset = BugDataset(project_name=args.project_name, scratch_path=args.scratch_path, dataframe=combined_df,parser=None)
     # config = AutoConfig.from_pretrained(args.model_path,
     #                                     num_labels=1)  # RobertaConfig.from_pretrained(model_path, num_labels=1)

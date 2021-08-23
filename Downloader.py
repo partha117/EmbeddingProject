@@ -51,5 +51,6 @@ transport.connect(username=username)
 transport.auth_password(username, password)
 transport.auth_interactive_dumb(username)
 client = paramiko.SFTPClient.from_transport(transport)
-download_embedding_rank_results()
+download_mrr_results()
+# download_rank_results()
 
