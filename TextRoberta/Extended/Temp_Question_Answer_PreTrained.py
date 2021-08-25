@@ -227,7 +227,7 @@ if __name__ == "__main__":
     parallelize(model, num_gpus=2, fp16=True, verbose='detail')
     model.train()
     optim = AdamW(model.parameters(), lr=5e-5)
-    train_loader = DataLoader(train_dataset, batch_size=2, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=10, shuffle=True)
 
     for epoch in range(3):
         # set model to train mode
