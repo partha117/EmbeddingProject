@@ -58,6 +58,7 @@ def get_combined_full_dataset(project_name, test_percentage=0.4):
     df5 = pd.merge(df1, df4, left_on='id', right_on='report_id', how='inner')
     df5['report'] = df5['summary'] + df5['description']
     df5['project_name'] = project_name.split("/")[-1]
+    df5.to_csv("{}_complete.csv".format(project_name), index=False)
     train_pos, test_pos = train_test_split(df5[df5['match'] == 1], test_size=test_percentage, random_state=13, shuffle=False)
     train, test = df5[df5['bug_id'].isin(train_pos['bug_id'])], df5[df5['bug_id'].isin(test_pos['bug_id'])]
     test.to_csv("/project/def-m2nagapp/partha9/Aster/" + "{}_test.csv".format(project_name.split("/")[-1]), index=False)

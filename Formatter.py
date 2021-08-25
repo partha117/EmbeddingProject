@@ -40,7 +40,11 @@ def json_formatter():
     df = pd.DataFrame(data_list)
     df = df.sort_values(['Model Name', "Embedding Training Strategy", "Training Data (for CNN Model)"],
                         ascending=(True, True, True))
-    df.to_csv("Combined_Performance.csv", index=False)
+    df['Model Name'] = df['Model Name'].map(lambda x: x if x =='Reformer' else "Roberta")
+    df['Embedding Training Strategy'] = df['Embedding Training Strategy'].map(lambda x: "QA" if x=='MLM and QA' else x)
+    df['Model Name'] = df['Model Name'] + "_" + df['Embedding Training Strategy'] + "_" + df['Training Data (for CNN Model)']
+    df = df.drop(columns=['Embedding Training Strategy', 'Training Data (for CNN Model)'])
+    df.to_csv("Analyzed_Results/Full_Models_Mrr.csv", index=False)
 
 def csv_formatter():
     all_ranks =  None
@@ -58,7 +62,7 @@ def csv_formatter():
                     all_ranks = df
                 else:
                     all_ranks[name] = df['position']
-    all_ranks.to_csv("Full_Models_Rank_Analysis.csv", index=False)
+    all_ranks.to_csv("Analyzed_Results/Full_Models_Rank_Analysis.csv", index=False)
 
 def csv_formatter_embeddings():
     all_ranks =  None
@@ -87,6 +91,6 @@ def get_matrix_corr(model=True):
         mat_corr.to_csv("Analyzed_Results/Full_Models_Correlation.csv")
     else:
         mat_corr.to_csv("Analyzed_Results/Embeddings_Correlation.csv")
-json_formatter()
+# json_formatter()
 csv_formatter()
 # get_matrix_corr(model=False)

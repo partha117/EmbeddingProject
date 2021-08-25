@@ -26,7 +26,8 @@ def download_rank_results():
                         model if model == "Reformer" else "Roberta") + "_" + training + "_" + data + ".csv"
                     try:
                         client.get(temp_path, save_path)
-                    except Exception:
+                    except Exception as ex:
+                        print(ex)
                         print("Missing file {}".format(temp_path))
     client.close()
 
@@ -51,6 +52,6 @@ transport.connect(username=username)
 transport.auth_password(username, password)
 transport.auth_interactive_dumb(username)
 client = paramiko.SFTPClient.from_transport(transport)
-download_mrr_results()
-# download_rank_results()
+#download_mrr_results()
+download_rank_results()
 
