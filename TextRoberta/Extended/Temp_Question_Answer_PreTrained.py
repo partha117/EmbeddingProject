@@ -223,8 +223,9 @@ if __name__ == "__main__":
     model = RobertaForQuestionAnswering.from_pretrained(
         "/project/def-m2nagapp/partha9/Aster/Text_Extended_Roberta_MLM" + "/train_output/" + "checkpoint-25000/")
     train_dataset = BugDataset(dataframe=train_data, tokenizer=tokenizer)
-    model.to(device)
+    model.to("cpu")
     parallelize(model, num_gpus=2, fp16=True, verbose='detail')
+    model.to(device)
     model.train()
     optim = AdamW(model.parameters(), lr=5e-5)
     train_loader = DataLoader(train_dataset, batch_size=10, shuffle=True)
