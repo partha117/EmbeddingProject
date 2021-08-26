@@ -3,7 +3,6 @@ from pathlib import Path
 from tokenizers import ByteLevelBPETokenizer
 import pandas as pd
 from tokenizers.processors import BertProcessing, RobertaProcessing
-from tree_sitter import Language, Parser
 import os
 from pathlib import Path
 from sklearn.model_selection import train_test_split
@@ -62,39 +61,6 @@ def create_report_files():
             file = open(scratch_path + "partha9/Data/Report_Files/{}.txt".format(uuid_name), "w")
             file.write(item[1]['title'] + " " + item[1]['description'])
             file.close()
-
-
-def convert_file_to_ast(file_path, parser):
-    file = open(file_path, "r")
-    file_content = file.read()
-    tree = parser.parse(bytes(file_content, "utf-8"))
-    return tree.root_node.sexp()
-
-
-def save_file(path, item):
-    JAVA_LANGUAGE = Language('/project/def-m2nagapp/partha9/Data/build/my-languages.so', 'java')
-    parser = Parser()
-    parser.set_language(JAVA_LANGUAGE)
-    before_fix_uuid_name = item[1]['before_fix_uuid_file_path'].split("/")[-1].split(".")[0]
-    before_fix_file = open(path + "Data/AST_Files/{}.txt".format(before_fix_uuid_name), "w")
-    before_fix_file.write(convert_file_to_ast(path + item[1]['before_fix_uuid_file_path'], parser))
-    before_fix_file.close()
-
-    after_fix_uuid_name = item[1]['after_fix_uuid_file_path'].split("/")[-1].split(".")[0]
-    after_fix_file = open(path + "Data/AST_Files/{}.txt".format(after_fix_uuid_name), "w")
-    after_fix_file.write(convert_file_to_ast(path + item[1]['after_fix_uuid_file_path'], parser))
-    after_fix_file.close()
-
-
-def create_ast_files():
-    if not os.path.isdir(scratch_path + "partha9/Data/AST_Files/"):
-        Path(scratch_path + "partha9/Data/AST_Files/").mkdir(parents=True, exist_ok=True)
-        df = pd.read_csv(scratch_path + "partha9/Data/Java_Unified_Data_with_SHA.csv")
-        path = scratch_path + "partha9/"
-        Parallel(n_jobs=-1)(  # Uses all cores but one
-            delayed(save_file)(path, item)
-            for item in df.iterrows()
-        )
 
 
 def file_reader(before_fix_ast_paths, after_fix_ast_path, report_paths):
