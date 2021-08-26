@@ -1,4 +1,3 @@
-from tree_sitter import Language, Parser
 from transformers.deepspeed import  HfDeepSpeedConfig
 from pathlib import Path
 from tokenizers import ByteLevelBPETokenizer
@@ -22,19 +21,6 @@ from transformers import AdamW
 from tqdm import tqdm
 import re
 import deepspeed
-
-
-def build_lib():
-    Language.build_library(
-        # Store the library in the `build` directory
-        '/home/partha9/build/my-languages.so',
-
-        # Include one or more languages
-        [
-            'tree-sitter-java',
-        ]
-    )
-
 
 def create_java_only_dataset():
     if not os.path.isfile(scratch_path + "partha9/Data/Java_Unified_Data_with_SHA.csv"):
