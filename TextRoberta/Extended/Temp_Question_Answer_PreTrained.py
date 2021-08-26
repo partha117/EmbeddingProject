@@ -1,5 +1,5 @@
 from tree_sitter import Language, Parser
-from parallelformers import parallelize
+from transformers.deepspeed import  HfDeepSpeedConfig
 from pathlib import Path
 from tokenizers import ByteLevelBPETokenizer
 import pandas as pd
@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 import torch
 from torch.utils.data import Dataset, DataLoader
 from transformers import DataCollatorForLanguageModeling, RobertaConfig, ReformerConfig, XLNetConfig, XLMConfig, \
-    XLMRobertaConfig
+    XLMRobertaConfig, deepspeed
 from transformers import Trainer, TrainingArguments
 from transformers import AdamW, RobertaModel, AutoModel, RobertaTokenizer, AutoModelForMaskedLM, RobertaForMaskedLM, \
     RobertaForQuestionAnswering
@@ -21,6 +21,7 @@ from torch.utils.data import DataLoader
 from transformers import AdamW
 from tqdm import tqdm
 import re
+import deepspeed
 
 
 def build_lib():
@@ -223,16 +224,16 @@ if __name__ == "__main__":
     model = RobertaForQuestionAnswering.from_pretrained(
         "/project/def-m2nagapp/partha9/Aster/Text_Extended_Roberta_MLM" + "/train_output/" + "checkpoint-25000/")
     train_dataset = BugDataset(dataframe=train_data, tokenizer=tokenizer)
-    model.to("cpu")
-    parallelize(model, num_gpus=2, fp16=True, verbose='detail')
+    deepspeed_config = HfDeepSpeedConfig("/home/partha9/ds_zero2.json")
     model.to(device)
-    model.train()
-    optim = AdamW(model.parameters(), lr=5e-5)
+    engine, optim, _, _ = deepspeed.initialize(model=model, config_params=deepspeed_config,model_parameters=model.parameters())
+    # model.train()
+    # optim = AdamW(model.parameters(), lr=5e-5)
     train_loader = DataLoader(train_dataset, batch_size=10, shuffle=True)
 
     for epoch in range(3):
         # set model to train mode
-        model.train()
+        engine.train()
         # setup loop (we use tqdm for the progress bar)
         loop = tqdm(train_loader, leave=True)
         for i, batch in enumerate(loop):
@@ -244,7 +245,7 @@ if __name__ == "__main__":
             start_positions = batch['start_positions'].to(device)
             end_positions = batch['end_positions'].to(device)
             # train model on batch and return outputs (incl. loss)
-            outputs = model(input_ids, attention_mask=attention_mask,
+            outputs = engine(input_ids, attention_mask=attention_mask,
                             start_positions=start_positions,
                             end_positions=end_positions)
             # extract loss
@@ -257,6 +258,7 @@ if __name__ == "__main__":
             loop.set_description("Epoch {}".format(epoch))
             loop.set_postfix(loss=loss.item())
             if i % save_at == 0:
-                model.save_pretrained(
-                    root_path + "/train_output/" + "CheckPoint-{}".format(
-                        i))
+                engine.save_checkpoint(save_dir=root_path + "/train_output/", tag="CheckPoint-")
+                # model.save_pretrained(
+                #     root_path + "/train_output/" + "CheckPoint-{}".format(
+                #         i))
