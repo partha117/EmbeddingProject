@@ -1,7 +1,9 @@
 from transformers.deepspeed import  HfDeepSpeedConfig
 from pathlib import Path
+import torch.distributed as dist
 from tokenizers import ByteLevelBPETokenizer
 import pandas as pd
+from math import ceil, floor
 from tokenizers.processors import BertProcessing, RobertaProcessing
 import os
 from pathlib import Path
@@ -14,12 +16,14 @@ from transformers import Trainer, TrainingArguments
 from transformers import AdamW, RobertaModel, AutoModel, RobertaTokenizer, AutoModelForMaskedLM, RobertaForMaskedLM, \
     RobertaForQuestionAnswering
 from joblib import Parallel, delayed
+from torch.optim._multi_tensor import AdamW as DistributedAdamW
 import numpy as np
 from torch.utils.data import DataLoader
 from transformers import AdamW
 from tqdm import tqdm
 import re
 import deepspeed
+import fairscale
 
 def create_java_only_dataset():
     if not os.path.isfile(scratch_path + "partha9/Data/Java_Unified_Data_with_SHA.csv"):
@@ -170,22 +174,22 @@ if __name__ == "__main__":
         Path(root_path + "/tokenizer/").mkdir(parents=True, exist_ok=True)
         tokenizer.save_model(root_path + "/tokenizer/", "./aster")
     tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
-
+    dist.init_process_group(backend='nccl', init_method="tcp://localhost:29501", rank=0, world_size=2)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     save_at = 500
     model = RobertaForQuestionAnswering.from_pretrained(
         "/project/def-m2nagapp/partha9/Aster/Text_Extended_Roberta_MLM" + "/train_output/" + "checkpoint-25000/")
     train_dataset = BugDataset(dataframe=train_data, tokenizer=tokenizer)
-    deepspeed_config = HfDeepSpeedConfig("/home/partha9/ds_zero2.json")
     model.to(device)
-    engine, optim, _, _ = deepspeed.initialize(model=model, config_params=deepspeed_config,model_parameters=model.parameters())
-    # model.train()
+    total_layers = sum(1 for item in model.parameters())
+    model = fairscale.nn.Pipe(model, balance=[ceil(total_layers * 0.5), floor(total_layers * 0.5)], devices=[0, 1], chunks=4)
     # optim = AdamW(model.parameters(), lr=5e-5)
+    optim = DistributedAdamW(model.parameters(), lr=5e-5)
     train_loader = DataLoader(train_dataset, batch_size=10, shuffle=True)
 
     for epoch in range(3):
         # set model to train mode
-        engine.train()
+        model.train()
         # setup loop (we use tqdm for the progress bar)
         loop = tqdm(train_loader, leave=True)
         for i, batch in enumerate(loop):
@@ -197,7 +201,7 @@ if __name__ == "__main__":
             start_positions = batch['start_positions'].to(device)
             end_positions = batch['end_positions'].to(device)
             # train model on batch and return outputs (incl. loss)
-            outputs = engine(input_ids, attention_mask=attention_mask,
+            outputs = model(input_ids, attention_mask=attention_mask,
                             start_positions=start_positions,
                             end_positions=end_positions)
             # extract loss
@@ -210,7 +214,6 @@ if __name__ == "__main__":
             loop.set_description("Epoch {}".format(epoch))
             loop.set_postfix(loss=loss.item())
             if i % save_at == 0:
-                engine.save_checkpoint(save_dir=root_path + "/train_output/", tag="CheckPoint-")
-                # model.save_pretrained(
-                #     root_path + "/train_output/" + "CheckPoint-{}".format(
-                #         i))
+                model.save_pretrained(
+                    root_path + "/train_output/" + "CheckPoint-{}".format(
+                        i))
