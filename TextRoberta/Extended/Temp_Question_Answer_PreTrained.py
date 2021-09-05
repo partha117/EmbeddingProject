@@ -24,6 +24,7 @@ from tqdm import tqdm
 import re
 import deepspeed
 import fairscale
+from datetime import timedelta
 
 def create_java_only_dataset():
     if not os.path.isfile(scratch_path + "partha9/Data/Java_Unified_Data_with_SHA.csv"):
@@ -174,7 +175,7 @@ if __name__ == "__main__":
         Path(root_path + "/tokenizer/").mkdir(parents=True, exist_ok=True)
         tokenizer.save_model(root_path + "/tokenizer/", "./aster")
     tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
-    dist.init_process_group(backend='nccl', init_method="'env://'", rank=0, world_size=2, timeout=10)
+    dist.init_process_group(backend='nccl', init_method="'env://'", rank=0, world_size=2, timeout=timedelta(minutes=5))
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     save_at = 500
     model = RobertaForQuestionAnswering.from_pretrained(
