@@ -177,7 +177,7 @@ if __name__ == "__main__":
     tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
     local_rank = int(os.environ.get("SLURM_LOCALID"))
     rank = int(os.environ.get("SLURM_NODEID")) * 1 + local_rank
-    dist.init_process_group(backend='nccl', init_method="tcp://{}:3456".format(os.environ['MASTER_ADDR']), rank=rank, world_size=2, timeout=timedelta(minutes=5))
+    dist.init_process_group(backend='nccl', init_method="tcp://{}:3456".format(os.environ['MASTER_ADDR']), rank=rank, world_size=int(os.environ['SLURM_NTASKS']), timeout=timedelta(minutes=5))
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     save_at = 500
     model = RobertaForQuestionAnswering.from_pretrained(
