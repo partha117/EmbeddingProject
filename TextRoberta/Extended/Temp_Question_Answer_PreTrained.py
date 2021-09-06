@@ -175,7 +175,7 @@ if __name__ == "__main__":
         Path(root_path + "/tokenizer/").mkdir(parents=True, exist_ok=True)
         tokenizer.save_model(root_path + "/tokenizer/", "./aster")
     tokenizer = RobertaTokenizer(root_path + "/tokenizer/aster-vocab.json", root_path + "/tokenizer/aster-merges.txt")
-    dist.init_process_group(backend='nccl', init_method="'env://'", rank=0, world_size=2, timeout=timedelta(minutes=5))
+    dist.init_process_group(backend='nccl', init_method="env://", rank=0, world_size=2, timeout=timedelta(minutes=5))
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     save_at = 500
     model = RobertaForQuestionAnswering.from_pretrained(
