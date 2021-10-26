@@ -333,7 +333,7 @@ if __name__ == "__main__":
             # ToDo: Pass only the model
             # ToDo: Edit sh file
             model = ClassifierModel(num_labels=1, base_model=model,
-                                    config=full_base_model.electra.config, embed_size=args.embed_size, code_overlap_size = args.overlap_size, report_overlap_size=args.overlap_size)
+                                    config=full_base_model.config, embed_size=args.embed_size, code_overlap_size = args.overlap_size, report_overlap_size=args.overlap_size)
     model.to(dev)
 
 
