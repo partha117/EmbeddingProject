@@ -368,10 +368,13 @@ if __name__ == "__main__":
 
             report_input, code_input, labels = \
                 tokenizer.batch_encode_plus(report, pad_to_multiple_of=args.token_max_size,
+                                            truncation=True,
                                             padding=True,
                                             return_tensors='pt')[
                     'input_ids'], \
                 tokenizer.batch_encode_plus(code, pad_to_multiple_of=args.token_max_size,
+                                            truncation=True,
+                                            padding=True,
                                             return_tensors='pt')[
                     'input_ids'], torch.tensor(labels, dtype=torch.float64).to(dev)
             # print("Here2")
