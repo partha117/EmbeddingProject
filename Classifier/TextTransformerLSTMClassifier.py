@@ -379,7 +379,7 @@ if __name__ == "__main__":
                     'input_ids'], torch.tensor(labels, dtype=torch.float64).to(dev)
             # print("Here2")
             # zero the parameter gradients
-            print("Code shape", code_input.shape)
+            print("--***Code Shape**--", code_input.shape)
             report_input, code_input = report_input.to(dev), code_input.to(dev)
             optimizer.zero_grad()
             c_in = get_splitted_tensor(code_input, max_size=int(args.embed_size),
