@@ -135,22 +135,22 @@ class ClassifierModel(nn.Module):
             input_size=self.code_max_size,
             embed_size=embed_size, num_labels=num_labels)
 
-    def forward(self, code_input_id, report_input_id):
-        c_in = get_splitted_tensor(code_input_id, max_size=self.code_max_size, overlap_size=self.code_overlap_size)
-        r_in = get_splitted_tensor(report_input_id, max_size=self.report_max_size,
-                                   overlap_size=self.report_overlap_size)
+    def forward(self, code_input_id, report_input_id, code_properties, report_properties):
+        # c_in = get_splitted_tensor(code_input_id, max_size=self.code_max_size, overlap_size=self.code_overlap_size)
+        # r_in = get_splitted_tensor(report_input_id, max_size=self.report_max_size,
+        #                            overlap_size=self.report_overlap_size)
+        #
+        # c_in_, c_num_sentences, c_max_segments = reshape_input(c_in)
+        # r_in_, r_num_sentences, r_max_segments = reshape_input(r_in)
 
-        c_in_, c_num_sentences, c_max_segments = reshape_input(c_in)
-        r_in_, r_num_sentences, r_max_segments = reshape_input(r_in)
+        code_output = self.dropout(self.transformer(code_input_id)[1])
+        report_output = self.dropout(self.transformer(report_input_id)[1])
 
-        code_output = self.dropout(self.transformer(c_in_)[1])
-        report_output = self.dropout(self.transformer(r_in_)[1])
-
-        converted_c_out = code_output.view(c_num_sentences, c_max_segments, code_output.shape[-1])
-        converted_r_out = report_output.view(r_num_sentences, r_max_segments, report_output.shape[-1])
+        converted_c_out = code_output.view(code_properties['num_sentences'], code_properties['max_segments'], code_output.shape[-1])
+        converted_r_out = report_output.view(report_properties['num_sentences'], report_properties['max_segments'], report_output.shape[-1])
         output = self.classifier(converted_c_out, converted_r_out,
-                                 code_properties={'num_sentences': c_num_sentences, "max_segments": c_max_segments},
-                                 report_properties={'num_sentences': r_num_sentences, "max_segments": r_max_segments})
+                                 code_properties=code_properties,
+                                 report_properties=report_properties)
         return output
 
 
@@ -328,7 +328,7 @@ if __name__ == "__main__":
             model = ClassifierModel(num_labels=1, base_model=model,
                                     config=full_base_model.electra.config, embed_size=int(args.embed_size), code_overlap_size=args.overlap_size, report_overlap_size=args.overlap_size)
         else:
-            full_base_model = AutoModel.from_pretrained(args.model_path + args.checkpoint)
+            full_base_model = AutoModel.from_pretrained("roberta-base")
             model = freeze_model(full_base_model, args.model_name)
             # ToDo: Pass only the model
             # ToDo: Edit sh file
@@ -380,7 +380,14 @@ if __name__ == "__main__":
             # print("Here2")
             # zero the parameter gradients
             optimizer.zero_grad()
-            outputs = model(code_input_id=code_input.to(dev), report_input_id=report_input.to(dev))
+            c_in = get_splitted_tensor(code_input, max_size=int(args.embed_size),
+                                       overlap_size=int(args.overlap_size))
+            r_in = get_splitted_tensor(report_input, max_size=int(args.embed_size),
+                                       overlap_size=int(args.overlap_size))
+
+            c_in_, c_num_sentences, c_max_segments = reshape_input(c_in)
+            r_in_, r_num_sentences, r_max_segments = reshape_input(r_in)
+            outputs = model(code_input_id=c_in_.to(dev), report_input_id=r_in_.to(dev),code_properties={"num_sentences": c_num_sentences, "max_segments": c_max_segments}, report_properties={"num_sentences": r_num_sentences, "max_segments": r_max_segments})
             loss = criterion(torch.sigmoid(outputs.view(-1).double()).to(dev), labels.double().to(dev))
             loss_list.append(loss.item())
             epoch_loss.append(loss)
