@@ -367,12 +367,12 @@ if __name__ == "__main__":
             # combined_input = report + " " + code_ast_tree
 
             report_input, code_input, labels = \
-                tokenizer.batch_encode_plus(report, pad_to_multiple_of=args.token_max_size,
+                tokenizer.batch_encode_plus(report,max_length=16 * args.token_max_size, pad_to_multiple_of=args.token_max_size,
                                             truncation=True,
                                             padding=True,
                                             return_tensors='pt')[
                     'input_ids'], \
-                tokenizer.batch_encode_plus(code, pad_to_multiple_of=args.token_max_size,
+                tokenizer.batch_encode_plus(code,max_length=16 * args.token_max_size, pad_to_multiple_of=args.token_max_size,
                                             truncation=True,
                                             padding=True,
                                             return_tensors='pt')[
