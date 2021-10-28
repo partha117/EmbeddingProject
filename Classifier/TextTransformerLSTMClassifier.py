@@ -135,7 +135,7 @@ class ClassifierModel(nn.Module):
             input_size=self.code_max_size,
             embed_size=embed_size, num_labels=num_labels)
 
-    def forward(self, code_input_id, report_input_id, code_properties, report_properties):
+    def forward(self, code_input_id, code_attention_mask, report_input_id, report_attention_mask, code_properties, report_properties):
         # c_in = get_splitted_tensor(code_input_id, max_size=self.code_max_size, overlap_size=self.code_overlap_size)
         # r_in = get_splitted_tensor(report_input_id, max_size=self.report_max_size,
         #                            overlap_size=self.report_overlap_size)
@@ -143,8 +143,8 @@ class ClassifierModel(nn.Module):
         # c_in_, c_num_sentences, c_max_segments = reshape_input(c_in)
         # r_in_, r_num_sentences, r_max_segments = reshape_input(r_in)
 
-        code_output = self.dropout(self.transformer(code_input_id)[1])
-        report_output = self.dropout(self.transformer(report_input_id)[1])
+        code_output = self.dropout(self.transformer(input_ids=code_input_id, attetion_mask=code_attention_mask)[1])
+        report_output = self.dropout(self.transformer(input_ids=report_input_id, attetion_mask=report_attention_mask)[1])
 
         converted_c_out = code_output.view(code_properties['num_sentences'], code_properties['max_segments'], code_output.shape[-1])
         converted_r_out = report_output.view(report_properties['num_sentences'], report_properties['max_segments'], report_output.shape[-1])
@@ -366,30 +366,35 @@ if __name__ == "__main__":
             # code_ast_tree = parser.parse(bytes(code, 'utf-8')).root_node.sexp()
             # combined_input = report + " " + code_ast_tree
 
-            report_input, code_input, labels = \
+            report_data, code_data, labels = \
                 tokenizer.batch_encode_plus(report,max_length=16 * args.token_max_size, pad_to_multiple_of=args.token_max_size,
                                             truncation=True,
                                             padding=True,
-                                            return_tensors='pt')[
-                    'input_ids'], \
+                                            return_tensors='pt', return_token_type_ids=True), \
                 tokenizer.batch_encode_plus(code,max_length=16 * args.token_max_size, pad_to_multiple_of=args.token_max_size,
                                             truncation=True,
                                             padding=True,
-                                            return_tensors='pt')[
+                                            return_tensors='pt', return_token_type_ids=True)[
                     'input_ids'], torch.tensor(labels, dtype=torch.float64).to(dev)
             # print("Here2")
             # zero the parameter gradients
-            print("--***Code Shape**--", code_input.shape)
-            report_input, code_input = report_input.to(dev), code_input.to(dev)
+            report_input, code_input = report_data['input_ids'].to(dev), code_data['input_ids'].to(dev)
+            report_attention, code_attention = report_data['attention_mask'].to(dev), code_data['attention_mask'].to(dev)
             optimizer.zero_grad()
             c_in = get_splitted_tensor(code_input, max_size=int(args.embed_size),
                                        overlap_size=int(args.overlap_size))
+            c_at = get_splitted_tensor(code_attention, max_size=int(args.embed_size),
+                                       overlap_size=int(args.overlap_size))
             r_in = get_splitted_tensor(report_input, max_size=int(args.embed_size),
+                                       overlap_size=int(args.overlap_size))
+            r_at = get_splitted_tensor(report_attention, max_size=int(args.embed_size),
                                        overlap_size=int(args.overlap_size))
 
             c_in_, c_num_sentences, c_max_segments = reshape_input(c_in)
+            c_at_, _, _ = reshape_input(c_at)
             r_in_, r_num_sentences, r_max_segments = reshape_input(r_in)
-            outputs = model(code_input_id=c_in_.to(dev), report_input_id=r_in_.to(dev),code_properties={"num_sentences": c_num_sentences, "max_segments": c_max_segments}, report_properties={"num_sentences": r_num_sentences, "max_segments": r_max_segments})
+            r_at_, _, _ = reshape_input(r_at)
+            outputs = model(code_input_id=c_in_.to(dev), code_attention_mask=c_at_.to(dev), report_input_id=r_in_.to(dev), report_attention_mask=r_at_.to(dev), code_properties={"num_sentences": c_num_sentences, "max_segments": c_max_segments}, report_properties={"num_sentences": r_num_sentences, "max_segments": r_max_segments})
             loss = criterion(torch.sigmoid(outputs.view(-1).double()).to(dev), labels.double().to(dev))
             loss_list.append(loss.item())
             epoch_loss.append(loss)
