@@ -143,8 +143,8 @@ class ClassifierModel(nn.Module):
         # c_in_, c_num_sentences, c_max_segments = reshape_input(c_in)
         # r_in_, r_num_sentences, r_max_segments = reshape_input(r_in)
 
-        code_output = self.dropout(self.transformer(input_ids=code_input_id, attetion_mask=code_attention_mask)[1])
-        report_output = self.dropout(self.transformer(input_ids=report_input_id, attetion_mask=report_attention_mask)[1])
+        code_output = self.dropout(self.transformer(input_ids=code_input_id, attention_mask=code_attention_mask)[1])
+        report_output = self.dropout(self.transformer(input_ids=report_input_id, attention_mask=report_attention_mask)[1])
 
         converted_c_out = code_output.view(code_properties['num_sentences'], code_properties['max_segments'], code_output.shape[-1])
         converted_r_out = report_output.view(report_properties['num_sentences'], report_properties['max_segments'], report_output.shape[-1])
