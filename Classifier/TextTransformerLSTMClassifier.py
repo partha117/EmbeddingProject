@@ -374,8 +374,7 @@ if __name__ == "__main__":
                 tokenizer.batch_encode_plus(code,max_length=16 * args.token_max_size, pad_to_multiple_of=args.token_max_size,
                                             truncation=True,
                                             padding=True,
-                                            return_tensors='pt')[
-                    'input_ids'], torch.tensor(labels, dtype=torch.float64).to(dev)
+                                            return_tensors='pt'), torch.tensor(labels, dtype=torch.float64).to(dev)
             # print("Here2")
             # zero the parameter gradients
             print(type(report_data['input_ids']), type(code_data['input_ids']))
