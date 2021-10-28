@@ -378,7 +378,7 @@ if __name__ == "__main__":
                     'input_ids'], torch.tensor(labels, dtype=torch.float64).to(dev)
             # print("Here2")
             # zero the parameter gradients
-            print(report_data, report_data['input_ids'],report_data.keys())
+            print(report_data['input_ids'].shape, code_data['input_ids'].shape, report_data.keys())
 
             report_input = report_data['input_ids']
             code_input = code_data['input_ids']
