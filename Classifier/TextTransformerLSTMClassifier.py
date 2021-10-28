@@ -379,8 +379,19 @@ if __name__ == "__main__":
             # print("Here2")
             # zero the parameter gradients
             print(report_data, report_data['input_ids'],report_data.keys())
-            report_input, code_input = report_data['input_ids'].to(dev), code_data['input_ids'].to(dev)
-            report_attention, code_attention = report_data['attention_mask'].to(dev), code_data['attention_mask'].to(dev)
+
+            report_input = report_data['input_ids']
+            code_input = code_data['input_ids']
+            report_input = report_input.to(dev)
+            code_input = code_input.to(dev)
+
+            report_attention = report_data['attention_mask']
+            code_attention = code_data['attention_mask']
+            report_attention = report_attention.to(dev)
+            code_attention = code_attention.to(dev)
+
+
+
             optimizer.zero_grad()
             c_in = get_splitted_tensor(code_input, max_size=int(args.embed_size),
                                        overlap_size=int(args.overlap_size))
