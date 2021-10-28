@@ -378,6 +378,7 @@ if __name__ == "__main__":
                     'input_ids'], torch.tensor(labels, dtype=torch.float64).to(dev)
             # print("Here2")
             # zero the parameter gradients
+            print(report_data, report_data['input_ids'],report_data.keys())
             report_input, code_input = report_data['input_ids'].to(dev), code_data['input_ids'].to(dev)
             report_attention, code_attention = report_data['attention_mask'].to(dev), code_data['attention_mask'].to(dev)
             optimizer.zero_grad()
