@@ -50,7 +50,7 @@ def count_parameters(m: torch.nn.Module, only_trainable: bool = False):
     return sum(p.numel() for p in unique)
 
 
-def get_combined_full_dataset(project_name, test_percentage=0.4):
+def get_combined_full_dataset(project_name, test_percentage=0.4, use_uuid=True):
     df1 = pd.read_csv("{}.csv".format(project_name), delimiter='\t')
     df2 = pd.read_csv("{}_features.csv".format(project_name))
     df3 = pd.read_csv("{}_features_file_content.csv".format(project_name))
@@ -58,6 +58,10 @@ def get_combined_full_dataset(project_name, test_percentage=0.4):
     df5 = pd.merge(df1, df4, left_on='id', right_on='report_id', how='inner')
     df5['report'] = df5['summary'] + df5['description']
     df5['project_name'] = project_name.split("/")[-1]
+    if use_uuid:
+        mapper = {item: str(uuid.uuid4()) for item in df5['id'].unique().tolist()}
+        for key, value in mapper.items():
+            df5.loc[df5['id'] == key, 'id'] = value
     df5.to_csv("{}_complete.csv".format(project_name), index=False)
     train_pos, test_pos = train_test_split(df5[df5['match'] == 1], test_size=test_percentage, random_state=13, shuffle=False)
     train, test = df5[df5['bug_id'].isin(train_pos['bug_id'])], df5[df5['bug_id'].isin(test_pos['bug_id'])]
