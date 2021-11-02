@@ -339,6 +339,7 @@ if __name__ == "__main__":
             model = ClassifierModel(num_labels=1, base_model=model,
                                     config=full_base_model.config, embed_size=int(args.embed_size), code_overlap_size = int(args.overlap_size), report_overlap_size=int(args.overlap_size))
     model.to(dev)
+    exit(0)
 
 
 
