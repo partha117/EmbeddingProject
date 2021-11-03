@@ -2,6 +2,7 @@ import transformers
 from tree_sitter import Language, Parser
 from pathlib import Path
 from tokenizers import ByteLevelBPETokenizer
+import random
 import pandas as pd
 from tokenizers.processors import BertProcessing, RobertaProcessing
 from tree_sitter import Language, Parser
@@ -76,13 +77,17 @@ def get_combined_full_dataset(project_name, test_percentage=0.4, use_uuid=True):
     return small_train
 
 
-def create_random_dataset(dataset_list, full_size=1000):
-    part_size = 1.0 / len(dataset_list)
+def create_random_dataset(dataset_list, primary_id='id', full_size=1000):
+    random.seed(13)
     temp_df = pd.DataFrame(columns=dataset_list[0].columns)
-    for item in dataset_list:
-        temp_df = temp_df.append(
-            item.sample(frac=(full_size * part_size) / len(item), replace=False, random_state=13).reset_index(
-                drop=True)).reset_index(drop=True)
+    median_group_size = np.array([item.groupby(primary_id).size().median() for item in dataset_list])
+    all_unique_list = np.array([len(item[primary_id].unique().tolist())for item in dataset_list])
+    all_unique_list = all_unique_list / np.sum(all_unique_list)
+    for item, percentage, group_size in zip(dataset_list, all_unique_list.tolist(), median_group_size):
+        all_primary_id = item[primary_id].unique().tolist()
+        sample_size = min(round((full_size * percentage) / group_size), len(all_primary_id))
+        sampled_primary_id = random.sample(all_primary_id, sample_size)
+        temp_df = temp_df.append(item[item[primary_id].isin(sampled_primary_id)]).reset_index(drop=True)
     return temp_df.sample(frac=1, random_state=13).reset_index(drop=True)
 
 def get_splitted_tensor(tensor, max_size, overlap_size):
@@ -305,7 +310,7 @@ if __name__ == "__main__":
             "/project/def-m2nagapp/partha9/Dataset/SWT"), get_combined_full_dataset(
             "/project/def-m2nagapp/partha9/Dataset/JDT"), get_combined_full_dataset(
             "/project/def-m2nagapp/partha9/Dataset/Eclipse_Platform_UI")
-        combined_df = create_random_dataset([df1, df2, df3, df4, df5, df6], full_size=5000)
+        combined_df = create_random_dataset([df1, df2, df3, df4, df5, df6], primary_id='id',full_size=5000)
         combined_df.to_csv("Bench_BLDS_Dataset.csv", index=False)
     elif args.embedding_data:
         combined_df = get_embedding_dataset(file_path=file_path)
