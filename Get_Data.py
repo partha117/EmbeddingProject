@@ -3,6 +3,7 @@ import uuid
 import zlib
 import csv
 import os
+from tqdm import  tqdm
 def file_converter(file_path):
     file = open(file_path, "r")
     return zlib.compress(file.read().encode("utf-8")).hex()
@@ -17,9 +18,9 @@ def get_embedding_dataset(file_path):
     df['before_fix_uuid_file_path'] = df['before_fix_uuid_file_path'].map(lambda x: file_converter(x))
     column_names = ['id', 'report', 'before_fix_uuid_file_path', 'repository','version']
     accumulate_df = pd.DataFrame(columns=column_names)
-    for row in df.sample(frac=1.0, random_state=13).reset_index(drop=True).iterrows():
+    for row in tqdm(df.iterrows(), total=df.shape[0]):
         negative_sample = df[(df['id'] != row[1]['id']) & (df['title'] != row[1]['title']) & (
-                df['github_repository'] == row[1]['github_repository'])].sample(frac=1, random_state=13)
+                df['github_repository'] == row[1]['github_repository'])]
         negative_sample['report'] = negative_sample['title'] + " " + negative_sample['description']
         drop_columns = set(negative_sample.columns.tolist()) - set(column_names)
 
