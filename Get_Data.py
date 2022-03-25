@@ -36,7 +36,7 @@ def get_embedding_dataset(file_path):
         rename_key({'id': 'cid', 'before_fix_uuid_file_path': 'file_content'}, positive_sample)
         rename_key({'id': 'cid', 'before_fix_uuid_file_path': 'file_content'}, negative_sample)
         with open("BLDS_With_Project.csv", 'a+') as f:
-            writer = csv.DictWriter(f, fieldnames=list(positive_sample.get()))
+            writer = csv.DictWriter(f, fieldnames=list(positive_sample.keys()))
             writer.writerow(positive_sample)
             writer.writerow((negative_sample))
 
