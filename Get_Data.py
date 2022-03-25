@@ -1,13 +1,15 @@
 import pandas as pd
 import uuid
 import zlib
-
-
+import csv
+import os
 def file_converter(file_path):
     file = open(file_path, "r")
     return zlib.compress(file.read().encode("utf-8")).hex()
 
-
+def rename_key(change, dict_obj):
+    for key, value in change.items():
+        dict_obj[value] = dict_obj.pop(key)
 def get_embedding_dataset(file_path):
     print("collecting embedding data")
     df = pd.read_csv(file_path + "Data/Java_Unified_Data.csv")
@@ -30,15 +32,13 @@ def get_embedding_dataset(file_path):
         negative_sample.drop(columns=drop_columns, inplace=True)
         negative_sample['id'] = positive_sample['id']
         negative_sample['match'] = 0
-
-        accumulate_df = accumulate_df.append(positive_sample, ignore_index=True)
-        accumulate_df = accumulate_df.append(negative_sample, ignore_index=True)
-
-    accumulate_df.reset_index(drop=True, inplace=True)
-    accumulate_df.rename(columns={'id': 'cid', 'before_fix_uuid_file_path': 'file_content'}, inplace=True)
-    return accumulate_df
+        rename_key({'id': 'cid', 'before_fix_uuid_file_path': 'file_content'}, positive_sample)
+        rename_key({'id': 'cid', 'before_fix_uuid_file_path': 'file_content'}, negative_sample)
+        with open("BLDS_With_Project.csv", 'a+') as f:
+            writer = csv.DictWriter(f, fieldnames=list(positive_sample.get()))
+            writer.writerow(positive_sample)
+            writer.writerow((negative_sample))
 
 if __name__ == "__main__":
     file_path = "/scratch/partha9/"
-    df = get_embedding_dataset(file_path)
-    df.to_csv("BLDS_With_Project.csv", index=False)
+    get_embedding_dataset(file_path)
