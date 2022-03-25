@@ -16,7 +16,7 @@ def filter_file(df, threshold, greater_or_equal=False):
     return df[condition].reset_index(drop=True).sort_values(by=['project','BugId', 'CId'])
 
 if __name__ =="__main__":
-    threshold = 5
+    threshold = 8
     df = pd.read_csv("Analyzed_Results/Embeddings_Rank_Analysis.csv")
     filtered_df_less = filter_file(df, threshold=threshold, greater_or_equal=False)
     filtered_df_greater_or_equal = filter_file(df, threshold=threshold, greater_or_equal=True)
